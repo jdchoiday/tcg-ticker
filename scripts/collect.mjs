@@ -22,6 +22,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { FX } from "./lib/fx.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -112,12 +113,16 @@ async function main() {
   if (CARD_IMAGES) log("⚠ 카드 이미지 ON (TCGPlayer CDN) — IP/ToS 본인 책임");
 
   const rows = [];
+  let auth401 = false;
   for (const it of wl.cards) {
     let card;
     try {
       card = MOCK ? await getMock(it.query) : await fetchCard(it, key);
+      if (!MOCK) await sleep(250); // 분당 호출 한도(60/min) 여유
     } catch (e) {
-      warn(`조회 실패: ${it.query} — ${e.message}`); continue;
+      warn(`조회 실패: ${it.query} — ${e.message}`);
+      if (/HTTP 401/.test(e.message)) { auth401 = true; break; } // 키 거부 → 더 두드리지 않음
+      continue;
     }
     if (!card) { warn(`결과 없음: ${it.query}`); continue; }
 
@@ -135,7 +140,15 @@ async function main() {
     });
   }
 
-  if (!rows.length) { console.error("✗ 수집된 카드가 0개입니다."); process.exit(1); }
+  if (!rows.length) {
+    if (auth401) {
+      console.error("✗ PPT 키가 거부됨(HTTP 401). PPT_API_KEY '값'이 잘못됐습니다.");
+      console.error("  → pokemonpricetracker.com/api 의 실제 키를 공백 없이 GitHub Secret PPT_API_KEY 에 다시 저장하세요.");
+    } else {
+      console.error("✗ 수집된 카드가 0개입니다.");
+    }
+    process.exit(1);
+  }
 
   rows.sort((a, b) => b._usd - a._usd);
   const out = rows.slice(0, topN).map((r, i) => {
