@@ -2,6 +2,8 @@
   "_note": "추적 카드 목록. collect.mjs 가 query 로 PokemonPriceTracker 를 조회해 grade(PSA 10) 의 등급가를 가져오고, 나머지 표시 필드(nameKo=헤드라인/nameEn=서브라인/type/lang 등)는 그대로 cards.json 으로 옮긴다. 시세 내림차순으로 rank 자동 부여.",
   "_warning": "[2026-06 구성] '실거래 고가' 중심 = PSA 10 시장이 활발한 빈티지 그레일($20k~$60k) + 1st Ed Base + 모던 alt-art 그레일($850~$3k). 박물관급(Illustrator/1st Ed Charizard 등 7자리)은 일일 변동성 위해 제외. PPT EN/JP. 영어 채널: nameKo=영문명, nameEn=에디션/세트.",
   "_tier_note": "실 API 키 발급 후 query/set/번호/실가격을 실응답으로 보정할 것. 가격은 조사 기반 추정 mock.",
+  "_images_note": "cardImages:true = API imageCdnUrl(TCGPlayer 카드사진)을 영상에 사용. ⚠️ 포켓몬/TCGPlayer IP — 수익화 시 본인 책임. 끄려면 false. 카드별 img(권리정리 이미지) 넣으면 그게 우선.",
+  "cardImages": true,
   "topN": 18,
   "cards": [
     {"query": "Charizard Gold Star Dragon Frontiers", "nameKo": "Charizard ★",   "nameEn": "Gold Star",       "set": "Dragon Frontiers 100/101", "rarity": "Gold Star", "type": "fire",    "lang": "EN", "grade": "PSA 10"},
