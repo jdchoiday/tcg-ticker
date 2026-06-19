@@ -96,7 +96,7 @@ out/                 mp4 산출물 (gitignore)
 2. **타깃 언어** → ✅ EN (영어). 캡션/해시태그 영어. (시장 세부는 추후)
 3. **브랜드명·채널 핸들** → 🟡 추후공지. `CONFIG.brandName="TCG INDEX"`, `handle="@your_handle"` placeholder 유지.
 4. **카드 이미지 소스** → 텍스트형(자체 스타일카드) 유지 = 기본 (§6 가드레일).
-5. **콘텐츠 방향** → ✅ 최고등급(PSA 10)·신규발행(메가에볼루션 시대)·화제 카드 중심. `data/watchlist.json` 가 스타터 리스트.
+5. **콘텐츠 방향** → ✅ 최고등급(PSA 10)·**가격 높은 카드 중심**(빈티지 그레일 + 프리미엄 모던 alt-art). `data/watchlist.json` 스타터 리스트(Illustrator·1st Ed Charizard·Gold Star·Moonbreon 등). USD/VND 포맷 M/B/T 약어 지원.
 
 ### 남은 액션(외부 계정 — JD 직접):
 - PPT 가입 → `PPT_API_KEY` 발급 → GitHub Secrets 등록

@@ -1,5 +1,5 @@
-📈 Pokémon Graded Card Price Index — TOP 18
-{{date}} · PSA / BGS / CGC market ranking
+💎 Most Expensive Graded Pokémon Cards — TOP 18
+{{date}} · PSA 10 market ranking
 
 🥇 Today's #1: {{top1_nameKo}} {{top1_grade}} → {{top1_usd}}
 Full Top 18 in the video 👀
