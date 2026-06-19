@@ -19,12 +19,13 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { FX } from "./lib/fx.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
-// ticker.html CONFIG.fx.krwPerUsd 와 동일하게 유지할 것 (표시 정합)
-const KRW_PER_USD = 1500;
+// 환율 단일 출처: scripts/lib/fx.mjs (ticker.html CONFIG.fx 와 일치 유지)
+const KRW_PER_USD = FX.krwPerUsd;
 const BASE_URL = process.env.PPT_BASE_URL || "https://www.pokemonpricetracker.com/api/v2"; // TODO 키 후 확정
 
 const MOCK = process.argv.includes("--mock");

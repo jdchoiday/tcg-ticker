@@ -7,6 +7,8 @@
 
 ## ⚙️ BUILD STATUS  `[updated 2026-06-19]`
 
+> ⚠️ 원격(웹) 세션 제약: chromium 다운로드 호스트가 egress allowlist 밖이라 **이 환경에선 영상 실렌더 불가**. 영상화는 로컬 또는 GitHub Actions(`.github/workflows/daily.yml`)/Railway 에서 돈다.
+
 | Phase | 내용 | 상태 |
 |---|---|---|
 | 렌더 엔진 | `src/ticker.html` — 무한 스크롤, 등급/USD/VND/순위, 9:16 | ✅ |
@@ -15,7 +17,7 @@
 | **Phase 1** | 수동 18장 `data/cards.json` + `caption.txt` 템플릿 | ✅ |
 | **Phase 2** | `scripts/capture.mjs` — Playwright 녹화 → ffmpeg → `out/ticker.mp4` | ✅ |
 | **Phase 3** | 수집기 `scripts/collect.mjs` (PokemonPriceTracker) + `watchlist.json` | 🟡 골격+mock 검증. 키 발급 후 실응답 매핑 확정 필요 |
-| Phase 4 | 스케줄(cron) + 발행(TikTok/Shorts 직전까지) | ❌ |
+| **Phase 4** | 오케스트레이터 `pipeline.mjs` + 캡션렌더 `caption.mjs` + 발행 스캐폴드 `publish.mjs` + 스케줄러 `.github/workflows/daily.yml` | 🟡 파이프라인/캡션/스케줄 동작. 발행은 dry-run까지(Buffer 토큰 발급 후 실전송 가드 해제 필요) |
 
 ### 데이터 소스 = PokemonPriceTracker (확정)
 조사·정밀검증 완료. **유일하게 약관(§6)이 "콘텐츠에 가격 표시"를 명시 허용**(출처표기 의무 없음), 무료 티어부터 PSA 등급가 제공, EN/JP 지원(**KR 미지원**). 카드 이미지는 포켓몬사 IP → **가격 텍스트 + 자체 스타일카드만**. 상세: 메모리 `project_tcg_data_source_research`.
@@ -30,7 +32,17 @@ npm run validate                    # cards.json 스키마 검증
 npm run serve                       # http://localhost:4173 미리보기
 npm run capture                     # out/ticker.mp4 생성 (한 루프 = CONFIG.loopSeconds)
 CAPTURE_SECONDS=6 npm run capture   # 짧은 테스트 클립
+npm run caption                     # caption.txt → out/caption.txt (placeholder 치환)
+npm run publish                     # 발행 dry-run (토큰+--confirm 없으면 전송 안 함)
+npm run pipeline                    # collect→validate→capture→caption 한 번에 (실 API)
+npm run pipeline:mock               # 위를 fixtures 로 (키 불필요)
+node scripts/pipeline.mjs --mock --no-video --publish  # chromium 없는 환경 검증용
 ```
+
+### Phase 4 발행(Buffer) 토큰 발급 후 할 일 (publish.mjs 의 TODO)
+1. `.env` 에 `BUFFER_ACCESS_TOKEN`, `BUFFER_PROFILE_IDS`(쉼표구분) 입력
+2. Buffer 영상 발행 멀티스텝(미디어 업로드 → updates/create) 실응답으로 확정 → `postToBuffer()` 스텁 교체
+3. GitHub Actions 시크릿(`PPT_API_KEY`/`BUFFER_*`) 등록 후 `daily.yml` cron 시각 조정
 
 ### Phase 3 키 발급 후 할 일 (collect.mjs 의 TODO)
 1. `.env.example` → `.env` 복사 후 `PPT_API_KEY` 입력 (https://www.pokemonpricetracker.com 무료 가입)
