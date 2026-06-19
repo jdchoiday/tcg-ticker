@@ -16,7 +16,7 @@
 | Phase 0 | `data/cards.schema.json` + `scripts/validate.mjs` (무의존 validator) | ✅ |
 | **Phase 1** | 수동 18장 `data/cards.json` + `caption.txt` 템플릿 | ✅ |
 | **Phase 2** | `scripts/capture.mjs` — Playwright 녹화 → ffmpeg → `out/ticker.mp4` | ✅ |
-| **Phase 3** | 수집기 `scripts/collect.mjs` (PokemonPriceTracker) + `watchlist.json` | 🟡 골격+mock 검증. 키 발급 후 실응답 매핑 확정 필요 |
+| **Phase 3** | 수집기 `scripts/collect.mjs` (PokemonPriceTracker) + `watchlist.json` | 🟢 OpenAPI v2 명세로 매핑 확정(엔드포인트/파라미터/`ebay.salesByGrade.psa10`). 키만 꽂으면 실데이터. 명세: `docs/ppt-openapi-v2.json` |
 | **Phase 4** | 오케스트레이터 `pipeline.mjs` + 캡션렌더 `caption.mjs` + 발행 스캐폴드 `publish.mjs` + 스케줄러 `.github/workflows/daily.yml` | 🟡 파이프라인/캡션/스케줄 동작. 발행은 dry-run까지(Buffer 토큰 발급 후 실전송 가드 해제 필요) |
 
 ### 데이터 소스 = PokemonPriceTracker (확정)
@@ -44,11 +44,11 @@ node scripts/pipeline.mjs --mock --no-video --publish  # chromium 없는 환경 
 2. Buffer 영상 발행 멀티스텝(미디어 업로드 → updates/create) 실응답으로 확정 → `postToBuffer()` 스텁 교체
 3. GitHub Actions 시크릿(`PPT_API_KEY`/`BUFFER_*`) 등록 후 `daily.yml` cron 시각 조정
 
-### Phase 3 키 발급 후 할 일 (collect.mjs 의 TODO)
-1. `.env.example` → `.env` 복사 후 `PPT_API_KEY` 입력 (https://www.pokemonpricetracker.com 무료 가입)
-2. 실응답 1건으로 **BASE_URL/엔드포인트/쿼리 파라미터** 확정 (`collect.mjs` 상단)
-3. 실응답으로 **등급가 키 구조**(`ebay.psa10.avg` 등) 확정 → `pickGradedUsd()` 와 `fixtures/ppt_sample.json` 교체
-4. `watchlist.json` 을 EN/JP 중심으로 재구성 (KR 미지원), `query` 를 실제 검색되는 영문명으로 보정
+### Phase 3 키 발급 후 할 일 (매핑은 명세로 확정됨 — 남은 건 키 + 정밀화)
+1. `PPT_API_KEY` 를 GitHub Secrets(또는 `.env`)에 입력 (https://www.pokemonpricetracker.com 무료 가입)
+2. `npm run collect` 1회 실행 → 18장 실응답 확인 (매핑/등급가 경로는 이미 명세대로 구현됨)
+3. 첫 실응답에서 각 카드의 **tcgPlayerId** 를 받아 `watchlist.json` 에 넣으면 검색 모호성 제거 + 결정적·저비용(단건 1크레딧). collect.mjs 가 tcgPlayerId 있으면 우선 사용.
+4. 9.5 등급 등 `salesByGrade` 키 표기(`bgs9_5` 가정)는 실응답으로 1회 확인
 
 ---
 

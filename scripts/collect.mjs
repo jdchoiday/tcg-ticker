@@ -12,9 +12,12 @@
  *
  * 키 발급(무료): https://www.pokemonpricetracker.com → 가입 → API 키 → .env 에 PPT_API_KEY=...
  *
- * ⚠️ 키 발급 후 확정 필요(TODO): (1) BASE_URL/엔드포인트/쿼리 파라미터,
- *    (2) 응답에서 카드 1건을 고르는 경로, (3) 등급가 키 구조(ebay.psa10.avg 등).
- *    아래는 조사 스키마 기반 best-effort 이며 fixtures 와 동일 가정.
+ * ✅ 매핑은 PPT OpenAPI v2 명세로 확정됨:
+ *    - GET /api/v2/cards?search=&language=english|japanese&limit=1&includeEbay=true
+ *    - 등급가: data.ebay.salesByGrade.<psa10|psa9|bgs9_5...>.smartMarketPrice.price (또는 averagePrice)
+ *    - 단건 정확도↑: watchlist 항목에 tcgPlayerId 넣으면 그걸로 단건 조회(검색 모호성 제거 + 1크레딧).
+ *    - 과금은 limit 기준(기본 50!). 단건은 반드시 limit=1.
+ *    첫 실 응답 1건 받으면 search→tcgPlayerId 로 고정 추천(결정적·저비용).
  */
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -43,21 +46,22 @@ async function loadEnv() {
   } catch { /* .env 없으면 무시 */ }
 }
 
-/* ---- grade 문자열 → 등급가 키. "PSA 10"→psa10, "BGS 9.5"→bgs95 ---- */
-const gradeKey = (g) => g.toLowerCase().replace(/[^a-z0-9]/g, "");
+/* ---- grade 문자열 → salesByGrade 키. "PSA 10"→psa10, "PSA 9"→psa9, "BGS 9.5"→bgs9_5 ---- */
+const gradeKey = (g) => g.toLowerCase().replace(/\s+/g, "").replace(/\./g, "_");
 
-/* ---- 카드 응답에서 등급가(USD) 추출. 없으면 market 폴백 ---- */
+/* ---- watchlist lang → PPT language 파라미터 (PPT 는 KR 미지원 → english 폴백) ---- */
+const LANG_API = { EN: "english", JP: "japanese", KR: "english" };
+
+/* ---- 카드 응답에서 등급가(USD) 추출. PPT v2: data.ebay.salesByGrade.<key>. 없으면 market 폴백 ---- */
 function pickGradedUsd(card, grade) {
   const key = gradeKey(grade);
-  const pools = [card.ebay, card.graded, card.prices?.graded].filter(Boolean);
-  for (const pool of pools) {
-    const g = pool[key];
-    if (g != null) {
-      const v = typeof g === "number" ? g : (g.avg ?? g.market ?? g.price ?? g.median);
-      if (typeof v === "number") return { usd: v, source: `${key}` };
-    }
+  const g = card.ebay?.salesByGrade?.[key];
+  if (g) {
+    // smartMarketPrice(추천) > averagePrice > medianPrice > 7일가
+    const v = g.smartMarketPrice?.price ?? g.averagePrice ?? g.medianPrice ?? g.marketPrice7Day;
+    if (typeof v === "number") return { usd: v, source: `ebay.${key}` };
   }
-  const m = card.prices?.market ?? card.market ?? card.prices?.mid;
+  const m = card.prices?.market;
   if (typeof m === "number") return { usd: m, source: "market(fallback)" };
   return null;
 }
@@ -73,14 +77,22 @@ async function getMock(query) {
   return MOCK_CARDS.find((c) => c.query.toLowerCase() === q) ?? null;
 }
 
-/* ---- 실 API: query 로 카드 1건 ---- */
-async function fetchCard(query, lang, key) {
-  const url = `${BASE_URL}/cards?search=${encodeURIComponent(query)}&language=${lang}`;
+/* ---- 실 API: 카드 1건. tcgPlayerId 있으면 정확 단건, 없으면 search 최상위 1건 ----
+ *  과금: limit 기준이라 단건은 limit=1 (1크레딧 + includeEbay 1크레딧 = 2). 기본 50 쓰면 50크레딧! */
+let LAST_REMAINING = null;
+async function fetchCard(it, key) {
+  const base = `${BASE_URL}/cards`;
+  const url = it.tcgPlayerId
+    ? `${base}?tcgPlayerId=${encodeURIComponent(it.tcgPlayerId)}&includeEbay=true`
+    : `${base}?search=${encodeURIComponent(it.query)}&language=${LANG_API[it.lang] || "english"}` +
+      `&limit=1&includeEbay=true&sortBy=price&sortOrder=desc`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${key}` } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} (${query})`);
-  const data = await res.json();
-  // TODO: 키 후 실응답으로 경로 확정
-  return data.data?.[0] ?? data.cards?.[0] ?? data.results?.[0] ?? (Array.isArray(data) ? data[0] : null);
+  if (!res.ok) throw new Error(`HTTP ${res.status} (${it.query})`);
+  const rem = res.headers.get("x-ratelimit-daily-remaining");
+  if (rem != null) LAST_REMAINING = rem;
+  const json = await res.json();
+  const d = json.data;            // 단건이면 객체, 검색이면 배열
+  return Array.isArray(d) ? (d[0] ?? null) : (d ?? null);
 }
 
 async function main() {
@@ -99,7 +111,7 @@ async function main() {
   for (const it of wl.cards) {
     let card;
     try {
-      card = MOCK ? await getMock(it.query) : await fetchCard(it.query, it.lang, key);
+      card = MOCK ? await getMock(it.query) : await fetchCard(it, key);
     } catch (e) {
       warn(`조회 실패: ${it.query} — ${e.message}`); continue;
     }
@@ -128,6 +140,7 @@ async function main() {
 
   await writeFile(resolve(ROOT, "data/cards.json"), JSON.stringify(out, null, 2) + "\n", "utf8");
   log(`✓ ${out.length}장 → data/cards.json (1위 ${out[0].nameKo} $${rows[0]._usd})`);
+  if (!MOCK && LAST_REMAINING != null) log(`  남은 크레딧(일일): ${LAST_REMAINING}`);
   log("  다음: npm run validate && npm run capture");
 }
 
