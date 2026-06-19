@@ -106,6 +106,10 @@ async function main() {
 
   const wl = JSON.parse(await readFile(resolve(ROOT, "data/watchlist.json"), "utf8"));
   const topN = wl.topN ?? wl.cards.length;
+  // 실제 카드 사진(TCGPlayer CDN) 사용 토글. ⚠️ 포켓몬/TCGPlayer IP — §6 가드레일 검토 후 켤 것.
+  // watchlist.json 의 "cardImages": true 또는 env PPT_CARD_IMAGES=1 일 때만 img 채움.
+  const CARD_IMAGES = process.env.PPT_CARD_IMAGES === "1" || wl.cardImages === true;
+  if (CARD_IMAGES) log("⚠ 카드 이미지 ON (TCGPlayer CDN) — IP/ToS 본인 책임");
 
   const rows = [];
   for (const it of wl.cards) {
@@ -125,7 +129,8 @@ async function main() {
       nameKo: it.nameKo, nameEn: it.nameEn, set: it.set, rarity: it.rarity,
       type: it.type, lang: it.lang, grade: it.grade,
       ...(it.pop ? { pop: it.pop } : {}),
-      krw, img: null,
+      krw,
+      img: CARD_IMAGES ? (it.img || card.imageCdnUrl400 || card.imageCdnUrl || null) : null,
       _usd: got.usd, _src: got.source,
     });
   }
