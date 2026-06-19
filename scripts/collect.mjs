@@ -126,8 +126,12 @@ async function main() {
     }
     if (!card) { warn(`결과 없음: ${it.query}`); continue; }
 
+    // 진단: 실 모드에서 어떤 상품이 매칭됐고 어떤 등급 데이터가 있는지
+    const grades = Object.keys(card.ebay?.salesByGrade || {});
+    if (!MOCK) log(`  ${it.query} → "${card.name ?? "?"}" #${card.tcgPlayerId ?? "?"} grades=[${grades.join("|") || "없음"}]`);
+
     const got = pickGradedUsd(card, it.grade);
-    if (!got) { warn(`시세 없음: ${it.query} (${it.grade})`); continue; }
+    if (!got) { warn(`시세 없음: ${it.query} (${it.grade}) — 위 매칭 상품에 ${gradeKey(it.grade)} 거래데이터 없음`); continue; }
 
     const krw = Math.round(got.usd * KRW_PER_USD);
     rows.push({
