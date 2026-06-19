@@ -1,0 +1,52 @@
+name: ci
+
+# PR/푸시마다 mock 데이터로 전체 파이프라인(수집→검증→영상→캡션)을 실제로 돌려
+# mp4 가 정상 생성되는지 검증하고, 결과물을 아티팩트로 올린다(키 불필요).
+# GitHub-hosted runner 는 브라우저/ffmpeg 설치가 되므로 원격 샌드박스와 달리 실렌더가 된다.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  render-mock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: install deps
+        run: npm ci
+
+      - name: install chromium + system deps
+        run: npx playwright install --with-deps chromium
+
+      - name: install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: run mock pipeline (collect → validate → capture → caption)
+        run: node scripts/pipeline.mjs --mock
+
+      - name: assert mp4 exists and is non-trivial
+        run: |
+          test -f out/ticker.mp4 || { echo "::error::out/ticker.mp4 not produced"; exit 1; }
+          bytes=$(stat -c%s out/ticker.mp4)
+          echo "ticker.mp4 = $bytes bytes"
+          test "$bytes" -gt 100000 || { echo "::error::mp4 suspiciously small ($bytes bytes)"; exit 1; }
+
+      - name: upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticker-mock-render
+          path: |
+            out/ticker.mp4
+            out/caption.txt
+            data/cards.json
+          if-no-files-found: warn
