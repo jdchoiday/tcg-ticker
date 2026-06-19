@@ -127,7 +127,7 @@ async function main() {
   });
 
   await writeFile(resolve(ROOT, "data/cards.json"), JSON.stringify(out, null, 2) + "\n", "utf8");
-  log(`✓ ${out.length}장 → data/cards.json (1위 ${out[0].nameEn} $${rows[0]._usd})`);
+  log(`✓ ${out.length}장 → data/cards.json (1위 ${out[0].nameKo} $${rows[0]._usd})`);
   log("  다음: npm run validate && npm run capture");
 }
 

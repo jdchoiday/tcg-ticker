@@ -91,10 +91,16 @@ out/                 mp4 산출물 (gitignore)
 .env                 BUFFER_TOKEN, SUPABASE_URL 등 (커밋 금지)
 ```
 
-## 8. 미해결 결정 — JD 확정 필요
-1. **가격 데이터 소스** (최대 블로커): 어디서 등급 시세를 가져올지. 스크래핑 가능 여부·API 유무.
-2. 타깃 시장·언어 (KR/VN/EN) → 캡션·해시태그·VND 비중.
-3. 브랜드명·채널 핸들 확정 (`CONFIG.brandName`, `handle`).
-4. 카드 이미지 소스: 자가촬영 vs 라이선스 vs 텍스트형 카드 유지.
+## 8. 결정 현황  `[updated 2026-06-19]`
+1. **가격 데이터 소스** → ✅ PokemonPriceTracker (무료 100c/day, PSA 등급가, 약관상 가격표시 허용). 백업 후보 PokeTrace.
+2. **타깃 언어** → ✅ EN (영어). 캡션/해시태그 영어. (시장 세부는 추후)
+3. **브랜드명·채널 핸들** → 🟡 추후공지. `CONFIG.brandName="TCG INDEX"`, `handle="@your_handle"` placeholder 유지.
+4. **카드 이미지 소스** → 텍스트형(자체 스타일카드) 유지 = 기본 (§6 가드레일).
+5. **콘텐츠 방향** → ✅ 최고등급(PSA 10)·신규발행(메가에볼루션 시대)·화제 카드 중심. `data/watchlist.json` 가 스타터 리스트.
 
-`[판단: Phase 0~2 완료. 다음 트리거 = §8-1 데이터 소스 확보 시 Phase 3 GO]`
+### 남은 액션(외부 계정 — JD 직접):
+- PPT 가입 → `PPT_API_KEY` 발급 → GitHub Secrets 등록
+- Buffer 가입 + TikTok 연결 → `BUFFER_ACCESS_TOKEN`/`BUFFER_PROFILE_IDS` → GitHub Secrets
+- 채널명/핸들 확정 시 `CONFIG.brandName`/`handle` 교체
+
+`[판단: Phase 0~4 골격 완료 + 영어 화제카드 워치리스트 구성. 다음 트리거 = PPT 키 → 실응답 매핑 확정(Phase 3) → Buffer 토큰 → 실발행(Phase 4)]`
