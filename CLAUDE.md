@@ -1,0 +1,88 @@
+# TCG Graded Price Ticker — CLAUDE.md
+포켓몬 카드 등급·시세 티커 / 자동화 콘텐츠 프로젝트
+
+> 이 파일은 세션마다 자동으로 읽힘. 핸드오버 원문 + 현재 빌드 상태.
+
+---
+
+## ⚙️ BUILD STATUS  `[updated 2026-06-19]`
+
+| Phase | 내용 | 상태 |
+|---|---|---|
+| 렌더 엔진 | `src/ticker.html` — 무한 스크롤, 등급/USD/VND/순위, 9:16 | ✅ |
+| **Phase 0** | 데이터/뷰 분리: `fetch('../data/cards.json')` + DEMO 폴백 | ✅ |
+| Phase 0 | `data/cards.schema.json` + `scripts/validate.mjs` (무의존 validator) | ✅ |
+| **Phase 1** | 수동 18장 `data/cards.json` + `caption.txt` 템플릿 | ✅ |
+| **Phase 2** | `scripts/capture.mjs` — Playwright 녹화 → ffmpeg → `out/ticker.mp4` | ✅ |
+| **Phase 3** | 수집기 `scripts/collect.mjs` (PokemonPriceTracker) + `watchlist.json` | 🟡 골격+mock 검증. 키 발급 후 실응답 매핑 확정 필요 |
+| Phase 4 | 스케줄(cron) + 발행(TikTok/Shorts 직전까지) | ❌ |
+
+### 데이터 소스 = PokemonPriceTracker (확정)
+조사·정밀검증 완료. **유일하게 약관(§6)이 "콘텐츠에 가격 표시"를 명시 허용**(출처표기 의무 없음), 무료 티어부터 PSA 등급가 제공, EN/JP 지원(**KR 미지원**). 카드 이미지는 포켓몬사 IP → **가격 텍스트 + 자체 스타일카드만**. 상세: 메모리 `project_tcg_data_source_research`.
+
+### 실행 / Commands
+```bash
+npm install                         # playwright 설치
+npx playwright install chromium     # 브라우저 1회 설치
+npm run collect:mock                # 키 없이 fixtures → cards.json (변환 검증)
+npm run collect                     # 실 API (.env 의 PPT_API_KEY 필요)
+npm run validate                    # cards.json 스키마 검증
+npm run serve                       # http://localhost:4173 미리보기
+npm run capture                     # out/ticker.mp4 생성 (한 루프 = CONFIG.loopSeconds)
+CAPTURE_SECONDS=6 npm run capture   # 짧은 테스트 클립
+```
+
+### Phase 3 키 발급 후 할 일 (collect.mjs 의 TODO)
+1. `.env.example` → `.env` 복사 후 `PPT_API_KEY` 입력 (https://www.pokemonpricetracker.com 무료 가입)
+2. 실응답 1건으로 **BASE_URL/엔드포인트/쿼리 파라미터** 확정 (`collect.mjs` 상단)
+3. 실응답으로 **등급가 키 구조**(`ebay.psa10.avg` 등) 확정 → `pickGradedUsd()` 와 `fixtures/ppt_sample.json` 교체
+4. `watchlist.json` 을 EN/JP 중심으로 재구성 (KR 미지원), `query` 를 실제 검색되는 영문명으로 보정
+
+---
+
+## 0. 한 줄 정의
+매일 "등급 카드 시세 랭킹" 세로(9:16) 영상을 자동 양산해 TikTok에 올리는 콘텐츠 파이프라인.
+
+## 2. 디자인 시스템 (요약)
+- **캔버스 1080×1920 고정**, `#stage` 를 `translate(-50%,-50%) scale(min(vw/1080, vh/1920))` 로 맞춤. **스케일 방식 변경 금지.**
+- 컬러 토큰(`:root`): `--void/--void2/--holo-a(#6EE7F0)/--holo-b(#C77DFF)/--gold(#F5C84B)/--ink/--muted/--vnd(#7DE3B0)`. 속성색은 `TYPE{}`.
+- 타이포: Space Grotesk(UI) / Space Mono(숫자) / Pretendard(한글). 가격(USD)이 카드당 최대 활자.
+- 모션: `#track` 2회 복제 → `@keyframes scroll`(translateX -50%, linear infinite, dur=loopSeconds); 카드 sheen 왕복; `#rail:hover` 일시정지; `prefers-reduced-motion` 존중.
+
+## 3. 데이터 계약 (핵심)
+수집기는 `data/cards.schema.json` 스키마의 배열(JSON)만 뱉으면 됨. 렌더는 손대지 않음.
+필드: `rank, nameKo, nameEn, set, rarity, type, lang, grade, pop?, krw, img?`.
+환산: `usd = krw / fx.krwPerUsd`, `vnd = usd * fx.vndPerUsd`. **통화 항상 USD+VND 병기.**
+`CONFIG`(ticker.html 상단): brandName/markText/backWord/subtitle/handle/tagline/loopSeconds/dataUrl/fx{date,krwPerUsd,vndPerUsd}.
+
+## 4. 목표 아키텍처
+`[수집]가격소스→cards.json  [렌더]ticker.html  [영상화]Playwright→mp4  [발행]Buffer→TikTok` (+ Supabase 시세 이력, Railway cron). 스택은 기존 JD 스택과 정합.
+
+## 6. 가드레일 — 반드시 준수
+1. 공식 포켓몬 아트·로고 **대량 스크래핑/재배포 금지.** `img`는 자가촬영 또는 권리정리 소스만.
+2. The Pokémon Company 로고/"공식" 룩 금지. "시세/마켓 인덱스" 성격 유지.
+3. 가격 소스 robots.txt·ToS 준수. 공식 API 우선.
+4. "Pokémon"은 카테고리 식별(지명적 사용)만.
+5. 본 가이드는 법률 자문 아님. KR/VN 저작권·상표 검토 필요(특히 수익화 시).
+
+## 7. 파일 구조
+```
+CLAUDE.md            이 문서
+src/ticker.html      렌더 엔진
+data/cards.json      데이터
+data/cards.schema.json
+scripts/validate.mjs   스키마 검증 (무의존)
+scripts/serve.mjs      정적 서버 (미리보기 + capture 용)
+scripts/capture.mjs    Phase 2: mp4 녹화
+scripts/collect.mjs    Phase 3 (미착수)
+out/                 mp4 산출물 (gitignore)
+.env                 BUFFER_TOKEN, SUPABASE_URL 등 (커밋 금지)
+```
+
+## 8. 미해결 결정 — JD 확정 필요
+1. **가격 데이터 소스** (최대 블로커): 어디서 등급 시세를 가져올지. 스크래핑 가능 여부·API 유무.
+2. 타깃 시장·언어 (KR/VN/EN) → 캡션·해시태그·VND 비중.
+3. 브랜드명·채널 핸들 확정 (`CONFIG.brandName`, `handle`).
+4. 카드 이미지 소스: 자가촬영 vs 라이선스 vs 텍스트형 카드 유지.
+
+`[판단: Phase 0~2 완료. 다음 트리거 = §8-1 데이터 소스 확보 시 Phase 3 GO]`

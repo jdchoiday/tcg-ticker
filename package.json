@@ -1,0 +1,17 @@
+{
+  "name": "tcg-ticker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Automated 9:16 graded-card price ticker → TikTok content pipeline (render → data → video → publish).",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "validate": "node scripts/validate.mjs",
+    "collect": "node scripts/collect.mjs",
+    "collect:mock": "node scripts/collect.mjs --mock",
+    "capture": "node scripts/capture.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

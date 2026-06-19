@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TCG Graded Price Ticker</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+
+<style>
+  /* =========================================================
+     CONFIG  —  자동화 시 CONFIG + data/cards.json 만 교체하면 됨
+     ========================================================= */
+  :root{
+    --void:#0A0D18;
+    --void2:#121830;
+    --panel:rgba(20,26,46,.72);
+    --panel-line:rgba(255,255,255,.10);
+    --holo-a:#6EE7F0;   /* cyan  */
+    --holo-b:#C77DFF;   /* violet */
+    --gold:#F5C84B;     /* premium grade */
+    --ink:#F3F6FF;
+    --muted:#8C97B6;
+    --vnd:#7DE3B0;      /* green for VND line */
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;background:#05060c;overflow:hidden;}
+  body{
+    position:relative;width:100vw;height:100vh;
+    font-family:"Space Grotesk","Pretendard",system-ui,sans-serif;
+  }
+
+  /* fixed 1080x1920 design canvas, scaled to fit the viewport.
+     녹화 시 이 비율 그대로 9:16 TikTok 영상이 됨 */
+  #stage{
+    position:fixed;left:50%;top:50%;
+    width:1080px;height:1920px;
+    transform-origin:center center;
+    background:
+      radial-gradient(120% 80% at 80% 0%, #1B2350 0%, transparent 55%),
+      radial-gradient(110% 70% at 0% 100%, #2A1846 0%, transparent 55%),
+      linear-gradient(180deg,var(--void) 0%, var(--void2) 50%, var(--void) 100%);
+    overflow:hidden;
+    color:var(--ink);
+  }
+
+  /* ---- blurred branding backdrop (흐릿한 뒷배경) ---- */
+  #brandBack{
+    position:absolute;inset:0;display:grid;place-items:center;
+    pointer-events:none;z-index:0;
+  }
+  #brandBack .word{
+    font-weight:700;letter-spacing:-.02em;
+    font-size:430px;line-height:.82;text-align:center;
+    color:#fff;opacity:.045;filter:blur(2px);
+    transform:rotate(-4deg);white-space:nowrap;
+  }
+  #brandBack .glow{
+    position:absolute;width:900px;height:900px;border-radius:50%;
+    background:radial-gradient(circle,var(--holo-b),transparent 60%);
+    opacity:.16;filter:blur(40px);top:-180px;right:-220px;
+  }
+  #brandBack .glow2{
+    position:absolute;width:760px;height:760px;border-radius:50%;
+    background:radial-gradient(circle,var(--holo-a),transparent 60%);
+    opacity:.13;filter:blur(40px);bottom:-160px;left:-200px;
+  }
+
+  /* ---- header ---- */
+  #head{
+    position:absolute;top:0;left:0;right:0;z-index:3;
+    padding:60px 64px 0;
+  }
+  .brandrow{display:flex;align-items:center;gap:22px;}
+  .mark{
+    width:74px;height:74px;border-radius:20px;flex:none;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--holo-a),var(--holo-b));
+    box-shadow:0 0 40px rgba(110,231,240,.35);
+    font-weight:700;font-size:38px;color:#0A0D18;letter-spacing:-.04em;
+  }
+  .brandname{font-size:46px;font-weight:700;letter-spacing:-.01em;}
+  .kicker{
+    margin-top:18px;display:flex;align-items:center;gap:16px;
+    font-size:25px;color:var(--muted);font-weight:500;
+  }
+  .live{display:flex;align-items:center;gap:11px;color:var(--holo-a);font-weight:600;}
+  .dot{width:14px;height:14px;border-radius:50%;background:var(--holo-a);
+       box-shadow:0 0 0 0 rgba(110,231,240,.7);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(110,231,240,.55)}70%{box-shadow:0 0 0 18px rgba(110,231,240,0)}100%{box-shadow:0 0 0 0 rgba(110,231,240,0)}}
+  .sep{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.6;}
+
+  /* ---- ticker rail ---- */
+  #rail{
+    position:absolute;top:300px;left:0;right:0;height:1320px;z-index:2;
+    display:flex;align-items:center;overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+            mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+  }
+  #track{display:flex;gap:64px;padding:0 32px;will-change:transform;
+         animation:scroll var(--dur,60s) linear infinite;}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  #rail:hover #track{animation-play-state:paused;}
+
+  /* ---- a single card column ---- */
+  .col{width:392px;flex:none;display:flex;flex-direction:column;align-items:center;}
+
+  .card{
+    position:relative;width:392px;height:548px;border-radius:26px;overflow:hidden;
+    background:linear-gradient(160deg,#202842,#0E1326);
+    border:2px solid var(--frame,rgba(255,255,255,.18));
+    box-shadow:0 30px 60px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  /* real photo slot — data의 img 가 있으면 채워짐 */
+  .card .photo{position:absolute;inset:0;background-size:cover;background-position:center;}
+  /* holo sheen — signature motion */
+  .card .sheen{
+    position:absolute;inset:0;mix-blend-mode:screen;opacity:.5;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 48%,transparent 66%);
+    transform:translateX(-30%);animation:sheen 5.5s ease-in-out infinite;
+  }
+  @keyframes sheen{0%,100%{transform:translateX(-40%)}50%{transform:translateX(40%)}}
+
+  /* placeholder card frame (실제 사진 없을 때 보이는 스타일라이즈 카드) */
+  .ph{position:absolute;inset:0;display:flex;flex-direction:column;}
+  .ph .top{height:64px;background:var(--type,#888);display:flex;align-items:center;
+           justify-content:space-between;padding:0 22px;color:#0A0D18;font-weight:700;}
+  .ph .topname{font-size:30px;letter-spacing:-.01em;}
+  .ph .hp{font-size:24px;font-weight:700;font-family:"Space Mono",monospace;}
+  .ph .art{flex:1;margin:16px;border-radius:14px;
+           background:
+             repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 14px,rgba(255,255,255,.02) 14px 28px),
+             radial-gradient(120% 120% at 30% 20%, var(--type,#888) 0%, transparent 60%),
+             linear-gradient(160deg,#0E1326,#1A2140);
+           display:grid;place-items:center;position:relative;overflow:hidden;}
+  .ph .art .silh{font-size:150px;opacity:.22;font-weight:700;}
+  .ph .rar{position:absolute;right:18px;bottom:16px;font-weight:700;font-size:30px;
+            color:var(--type,#fff);text-shadow:0 2px 12px rgba(0,0,0,.6);font-family:"Space Mono",monospace;}
+  .ph .foot{height:54px;display:flex;align-items:center;justify-content:space-between;
+            padding:0 22px;color:var(--muted);font-size:20px;font-family:"Space Mono",monospace;}
+
+  /* lang flag chip */
+  .lang{position:absolute;top:18px;left:18px;z-index:4;
+        padding:7px 14px;border-radius:999px;font-size:21px;font-weight:700;
+        background:rgba(5,6,12,.7);border:1px solid var(--panel-line);
+        backdrop-filter:blur(6px);}
+
+  /* ---- info block under card ---- */
+  .info{width:392px;margin-top:26px;background:var(--panel);
+        border:1px solid var(--panel-line);border-radius:22px;
+        padding:24px 26px 26px;backdrop-filter:blur(14px);
+        box-shadow:0 18px 40px rgba(0,0,0,.4);}
+  .nm-ko{font-size:34px;font-weight:700;letter-spacing:-.01em;line-height:1.12;}
+  .nm-en{font-size:25px;color:var(--muted);font-weight:500;margin-top:4px;}
+  .grade-row{display:flex;align-items:center;gap:12px;margin:18px 0 16px;}
+  .grade{display:inline-flex;align-items:baseline;gap:8px;
+         padding:8px 16px;border-radius:12px;font-family:"Space Mono",monospace;
+         font-weight:700;font-size:26px;color:#0A0D18;
+         background:linear-gradient(135deg,var(--gold),#FFE08A);}
+  .pop{font-size:21px;color:var(--muted);font-family:"Space Mono",monospace;}
+  .price-usd{font-family:"Space Mono",monospace;font-weight:700;font-size:48px;
+             letter-spacing:-.02em;line-height:1;}
+  .price-vnd{font-family:"Space Mono",monospace;font-weight:700;font-size:30px;
+             color:var(--vnd);margin-top:8px;}
+  .rankpill{position:absolute;}
+  .col .rank{margin-top:18px;display:inline-flex;align-items:center;gap:10px;
+             font-family:"Space Mono",monospace;font-weight:700;font-size:30px;}
+  .col .rank .hash{color:var(--holo-a);}
+  .col .rank .lbl{font-family:"Space Grotesk";font-weight:500;font-size:22px;color:var(--muted);}
+
+  /* ---- footer ---- */
+  #foot{position:absolute;bottom:0;left:0;right:0;z-index:3;
+        padding:0 64px 56px;display:flex;justify-content:space-between;align-items:flex-end;}
+  #foot .fx{font-size:23px;color:var(--muted);font-family:"Space Mono",monospace;line-height:1.5;}
+  #foot .handle{font-size:30px;font-weight:700;color:var(--ink);}
+  #foot .tag{font-size:22px;color:var(--muted);font-weight:500;text-align:right;margin-top:6px;}
+
+  @media (prefers-reduced-motion:reduce){
+    #track{animation-duration:160s;}
+    .card .sheen,.dot{animation:none;}
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div id="brandBack">
+      <div class="glow"></div><div class="glow2"></div>
+      <div class="word" id="bw">TCG</div>
+    </div>
+
+    <header id="head">
+      <div class="brandrow">
+        <div class="mark" id="markTxt">TC</div>
+        <div class="brandname" id="brandName">TCG INDEX</div>
+      </div>
+      <div class="kicker">
+        <span class="live"><span class="dot"></span>LIVE</span>
+        <span class="sep"></span>
+        <span id="subtitle">POKÉMON TCG · GRADED PRICE RANKING</span>
+      </div>
+    </header>
+
+    <div id="rail"><div id="track"></div></div>
+
+    <footer id="foot">
+      <div class="fx" id="fxNote"></div>
+      <div>
+        <div class="handle" id="handle">@your_handle</div>
+        <div class="tag" id="tagline">Daily graded-card price index</div>
+      </div>
+    </footer>
+  </div>
+
+<script>
+/* =====================================================================
+   CONFIG  — 브랜드/환율/속도. 자동화 파이프라인이 fx 를 덮어씀.
+   ===================================================================== */
+const CONFIG = {
+  brandName : "TCG INDEX",      // ← 너의 브랜드명으로 교체
+  markText  : "TC",             // 로고 자리(2글자) — 실제 로고 PNG로 교체 가능
+  backWord  : "TCG",            // 뒷배경 흐릿한 워드마크
+  subtitle  : "POKÉMON TCG · GRADED PRICE RANKING",
+  handle    : "@your_handle",   // ← 채널 핸들
+  tagline   : "Daily graded-card price index",
+  loopSeconds : 60,             // 스크롤 한 바퀴(작을수록 빠름). 눈 편한 값 50~75
+  dataUrl   : "../data/cards.json", // Phase 0: 데이터/뷰 분리. 실패 시 DEMO_CARDS 폴백.
+  fx : {                        // 환율 (추정) — 기준일 표기됨
+    date     : "2026-06-16",
+    krwPerUsd: 1500,            // JD 표준 환율
+    vndPerUsd: 25400            // 추정
+  }
+};
+// capture.mjs / 디버깅이 읽을 수 있게 노출
+window.CONFIG = CONFIG;
+
+/* DEMO 폴백 — file:// 직접 열기 또는 cards.json fetch 실패 시에만 사용 */
+const DEMO_CARDS = [
+  {rank:1, nameKo:"리자몽 VSTAR UR", nameEn:"Charizard VSTAR UR", set:"s12a 212/172", rarity:"UR", type:"fire",    lang:"JP", grade:"PSA 10", pop:"POP 41", krw:6800000},
+  {rank:2, nameKo:"리자몽 ex SAR",   nameEn:"Charizard ex SAR",   set:"sv3a 200/190", rarity:"SAR",type:"fire",    lang:"KR", grade:"PSA 10", pop:"POP 88", krw:2400000},
+  {rank:3, nameKo:"뮤 VMAX HR",      nameEn:"Mew VMAX HR",        set:"s8b 268/184",  rarity:"HR", type:"psychic", lang:"JP", grade:"BGS 9.5",pop:"POP 12", krw:1950000},
+  {rank:4, nameKo:"피카츄 AR",       nameEn:"Pikachu AR",         set:"s12a 205/172", rarity:"AR", type:"electric",lang:"KR", grade:"PSA 10", pop:"POP 210",krw:402000},
+];
+
+/* ---- type → color ---- */
+const TYPE = {
+  electric:"#F7D154", fire:"#F0743C", water:"#5BA6F0", grass:"#5BC47A",
+  steel:"#B8C0CC", psychic:"#C77DFF", dragon:"#7B6CF0", dark:"#5A5E78",
+  fairy:"#F49AC2", normal:"#CDB89A"
+};
+const TYPE_GLYPH = {
+  electric:"⚡", fire:"🔥", water:"💧", grass:"🍃", steel:"⚙", psychic:"✦",
+  dragon:"✧", dark:"☾", fairy:"❀", normal:"✶"
+};
+
+/* ---- helpers ---- */
+const fmtUsd = n => "$"+Math.round(n).toLocaleString("en-US");
+const fmtVnd = n => {
+  if(n>=1e6) return "₫"+(n/1e6).toFixed(2).replace(/\.?0+$/,"")+"M";
+  return "₫"+Math.round(n).toLocaleString("en-US");
+};
+
+function cardHTML(c){
+  const usd = c.krw / CONFIG.fx.krwPerUsd;
+  const vnd = usd * CONFIG.fx.vndPerUsd;
+  const col = TYPE[c.type] || "#888";
+  const photo = c.img
+    ? `<div class="photo" style="background-image:url('${c.img}')"></div>`
+    : `<div class="ph">
+         <div class="top" style="--type:${col}">
+           <span class="topname">${c.nameKo.split(" ")[0]}</span>
+           <span class="hp">${TYPE_GLYPH[c.type]||""}</span>
+         </div>
+         <div class="art" style="--type:${col}">
+           <span class="silh">${TYPE_GLYPH[c.type]||"?"}</span>
+           <span class="rar" style="--type:${col}">${c.rarity}</span>
+         </div>
+         <div class="foot"><span>${c.set}</span><span>${c.lang}</span></div>
+       </div>`;
+  return `
+   <div class="col">
+     <div class="card" style="--frame:${col}66">
+       <span class="lang">${c.lang}</span>
+       ${photo}
+       <div class="sheen"></div>
+     </div>
+     <div class="info">
+       <div class="nm-ko">${c.nameKo}</div>
+       <div class="nm-en">${c.nameEn} · ${c.set}</div>
+       <div class="grade-row">
+         <span class="grade">${c.grade}</span>
+         ${c.pop?`<span class="pop">${c.pop}</span>`:""}
+       </div>
+       <div class="price-usd">${fmtUsd(usd)}</div>
+       <div class="price-vnd">${fmtVnd(vnd)}</div>
+     </div>
+     <div class="rank"><span class="hash">#${c.rank}</span><span class="lbl">RANK</span></div>
+   </div>`;
+}
+
+/* ---- data load: Phase 0 분리 (fetch → 실패 시 DEMO 폴백) ---- */
+async function loadCards(){
+  try{
+    const res = await fetch(CONFIG.dataUrl, {cache:"no-store"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const data = await res.json();
+    if(!Array.isArray(data) || data.length === 0) throw new Error("empty/invalid array");
+    return data;
+  }catch(e){
+    console.warn(`[ticker] cards.json 로드 실패 (${e.message}) → DEMO_CARDS 폴백`);
+    return DEMO_CARDS;
+  }
+}
+
+/* ---- render ---- */
+function render(cards){
+  document.getElementById("brandName").textContent = CONFIG.brandName;
+  document.getElementById("markTxt").textContent   = CONFIG.markText;
+  document.getElementById("bw").textContent         = CONFIG.backWord;
+  document.getElementById("subtitle").textContent   = CONFIG.subtitle;
+  document.getElementById("handle").textContent     = CONFIG.handle;
+  document.getElementById("tagline").textContent    = CONFIG.tagline;
+  document.getElementById("fxNote").innerHTML =
+    `FX ${CONFIG.fx.date} · 1 USD = ₩${CONFIG.fx.krwPerUsd.toLocaleString()} = ₫${CONFIG.fx.vndPerUsd.toLocaleString()}<br>` +
+    `<span style="opacity:.7">prices = estimate / demo data</span>`;
+
+  const html = cards.map(cardHTML).join("");
+  const track = document.getElementById("track");
+  track.innerHTML = html + html;            // 무한 루프용 2회 복제
+  track.style.setProperty("--dur", CONFIG.loopSeconds+"s");
+
+  // capture.mjs 가 "렌더 완료"를 감지할 신호
+  window.__ticableReady = true;
+  document.documentElement.setAttribute("data-ready", "1");
+}
+
+/* ---- scale 1080x1920 canvas to viewport ---- */
+function fit(){
+  const s = Math.min(window.innerWidth/1080, window.innerHeight/1920);
+  document.getElementById("stage").style.transform = `translate(-50%,-50%) scale(${s})`;
+}
+window.addEventListener("resize", fit);
+
+(async () => {
+  const cards = await loadCards();
+  render(cards);
+  fit();
+})();
+</script>
+</body>
+</html>

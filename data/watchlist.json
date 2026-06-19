@@ -1,0 +1,25 @@
+{
+  "_note": "추적 카드 목록. collect.mjs 가 query 로 PokemonPriceTracker 를 조회해 grade 의 등급가를 가져오고, 나머지 표시 필드(nameKo/type/lang 등)는 그대로 cards.json 으로 옮긴다. 시세 내림차순으로 rank 자동 부여.",
+  "_warning": "PokemonPriceTracker 는 EN/JP 만 지원(KR 미지원). 실데이터로 가려면 lang 을 EN/JP 중심으로 구성할 것. 아래는 mock 검증용 데모(현 cards.json 과 동일 세트).",
+  "topN": 18,
+  "cards": [
+    {"query": "Charizard VSTAR",  "nameKo": "리자몽 VSTAR UR", "nameEn": "Charizard VSTAR UR", "set": "s12a 212/172", "rarity": "UR",  "type": "fire",     "lang": "JP", "grade": "PSA 10",  "pop": "POP 41"},
+    {"query": "Charizard ex",     "nameKo": "리자몽 ex SAR",   "nameEn": "Charizard ex SAR",   "set": "sv3a 200/190", "rarity": "SAR", "type": "fire",     "lang": "KR", "grade": "PSA 10",  "pop": "POP 88"},
+    {"query": "Mew VMAX",         "nameKo": "뮤 VMAX HR",      "nameEn": "Mew VMAX HR",        "set": "s8b 268/184",  "rarity": "HR",  "type": "psychic",  "lang": "JP", "grade": "BGS 9.5", "pop": "POP 12"},
+    {"query": "Garchomp",         "nameKo": "가브리아스 SAR",  "nameEn": "Garchomp SAR",       "set": "sv4a 320/190", "rarity": "SAR", "type": "dragon",   "lang": "KR", "grade": "PSA 10",  "pop": "POP 64"},
+    {"query": "Mewtwo V",         "nameKo": "뮤츠 V SR",       "nameEn": "Mewtwo V SR",        "set": "s12a 195/172", "rarity": "SR",  "type": "psychic",  "lang": "JP", "grade": "PSA 10",  "pop": "POP 73"},
+    {"query": "Venusaur ex",      "nameKo": "이상해꽃 ex SAR", "nameEn": "Venusaur ex SAR",    "set": "sv3a 198/190", "rarity": "SAR", "type": "grass",    "lang": "KR", "grade": "CGC 9.5", "pop": "POP 30"},
+    {"query": "Blastoise ex",     "nameKo": "거북왕 ex SAR",   "nameEn": "Blastoise ex SAR",   "set": "sv3a 199/190", "rarity": "SAR", "type": "water",    "lang": "EN", "grade": "PSA 10",  "pop": "POP 51"},
+    {"query": "Marshadow",        "nameKo": "마샤도 SR",       "nameEn": "Marshadow SR",       "set": "sm3 070/051",  "rarity": "SR",  "type": "psychic",  "lang": "JP", "grade": "PSA 9",   "pop": "POP 26"},
+    {"query": "Ditto V",          "nameKo": "메타몽 V SR",     "nameEn": "Ditto V SR",         "set": "s8b 264/184",  "rarity": "SR",  "type": "normal",   "lang": "KR", "grade": "PSA 10",  "pop": "POP 95"},
+    {"query": "Charmander",       "nameKo": "파이리 AR",       "nameEn": "Charmander AR",      "set": "sv3a 167/190", "rarity": "AR",  "type": "fire",     "lang": "KR", "grade": "PSA 10",  "pop": "POP 120"},
+    {"query": "Gyarados ex",      "nameKo": "갸라도스 ex SAR", "nameEn": "Gyarados ex SAR",    "set": "sv4a 322/190", "rarity": "SAR", "type": "water",    "lang": "JP", "grade": "BGS 9",   "pop": "POP 18"},
+    {"query": "Snorlax V",        "nameKo": "잠만보 V SR",     "nameEn": "Snorlax V SR",       "set": "s9a 091/067",  "rarity": "SR",  "type": "normal",   "lang": "EN", "grade": "PSA 10",  "pop": "POP 60"},
+    {"query": "Rayquaza V",       "nameKo": "레쿠쟈 V SR",     "nameEn": "Rayquaza V SR",      "set": "s7R 076/067",  "rarity": "SR",  "type": "dragon",   "lang": "KR", "grade": "PSA 10",  "pop": "POP 47"},
+    {"query": "Lillie",           "nameKo": "릴리에 SR",       "nameEn": "Lillie SR",          "set": "sm9 119/114",  "rarity": "SR",  "type": "fairy",    "lang": "JP", "grade": "PSA 9",   "pop": "POP 22"},
+    {"query": "Dialga",           "nameKo": "디아루가 EX",     "nameEn": "Dialga EX",          "set": "XY 019/018",   "rarity": "EX",  "type": "steel",    "lang": "KR", "grade": "BGS 9",   "pop": "POP 15"},
+    {"query": "Pikachu",          "nameKo": "피카츄 AR",       "nameEn": "Pikachu AR",         "set": "s12a 205/172", "rarity": "AR",  "type": "electric", "lang": "KR", "grade": "PSA 10",  "pop": "POP 210"},
+    {"query": "Eevee",            "nameKo": "이브이 AR",       "nameEn": "Eevee AR",           "set": "sv2a 167/165", "rarity": "AR",  "type": "normal",   "lang": "EN", "grade": "PSA 10",  "pop": "POP 180"},
+    {"query": "Mew",             "nameKo": "뮤 AR",           "nameEn": "Mew AR",             "set": "s12a 196/172", "rarity": "AR",  "type": "psychic",  "lang": "JP", "grade": "PSA 9",   "pop": "POP 90"}
+  ]
+}

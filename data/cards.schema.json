@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://tcg-ticker/data/cards.schema.json",
+  "title": "TCG Ticker cards.json",
+  "description": "Data contract consumed by src/ticker.html. The render layer never changes; the collector only needs to emit an array matching this schema.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["rank", "nameKo", "nameEn", "set", "rarity", "type", "lang", "grade", "krw"],
+    "properties": {
+      "rank":   { "type": "integer", "minimum": 1, "description": "Ranking position" },
+      "nameKo": { "type": "string", "minLength": 1, "description": "Korean name" },
+      "nameEn": { "type": "string", "minLength": 1, "description": "English name" },
+      "set":    { "type": "string", "minLength": 1, "description": "Set code / number, e.g. 's12a 205/172'" },
+      "rarity": { "type": "string", "minLength": 1, "description": "AR|SR|UR|SAR|HR|V|VMAX|ex|EX ..." },
+      "type":   {
+        "type": "string",
+        "enum": ["electric","fire","water","grass","steel","psychic","dragon","dark","fairy","normal"],
+        "description": "Drives the type color. Must be one of the TYPE{} keys."
+      },
+      "lang":   { "type": "string", "enum": ["KR","JP","EN"], "description": "Language edition" },
+      "grade":  { "type": "string", "minLength": 1, "description": "Grading brand + score, e.g. 'PSA 10'" },
+      "pop":    { "type": ["string","null"], "description": "Optional population, e.g. 'POP 210'. Omit or null to hide." },
+      "krw":    { "type": "number", "exclusiveMinimum": 0, "description": "Latest price in KRW. USD/VND are derived." },
+      "img":    { "type": ["string","null"], "description": "Real card photo URL, or null for the styled placeholder card. See guardrails in CLAUDE.md." }
+    }
+  }
+}

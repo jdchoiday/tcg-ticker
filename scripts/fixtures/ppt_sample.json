@@ -1,0 +1,23 @@
+{
+  "_note": "PokemonPriceTracker mock 응답 (조사 스키마 기반, 검증 전). collect.mjs --mock 가 이 배열에서 query 로 카드를 찾아 변환한다. 키 발급 후 실응답 1건으로 ebay.<grade>.avg 키 구조를 확정하고 이 파일을 교체할 것. 가격은 USD.",
+  "cards": [
+    {"query": "Charizard VSTAR", "name": "Charizard VSTAR", "set": "s12a 212/172", "language": "JP", "prices": {"market": 4000}, "ebay": {"psa10": {"avg": 4533}, "psa9": {"avg": 2100}}},
+    {"query": "Charizard ex",    "name": "Charizard ex",    "set": "sv3a 200/190", "language": "EN", "prices": {"market": 1400}, "ebay": {"psa10": {"avg": 1600}, "psa9": {"avg": 720}}},
+    {"query": "Mew VMAX",        "name": "Mew VMAX",        "set": "s8b 268/184",  "language": "JP", "prices": {"market": 1100}, "ebay": {"psa10": {"avg": 1450}, "bgs95": {"avg": 1300}}},
+    {"query": "Garchomp",        "name": "Garchomp",        "set": "sv4a 320/190", "language": "EN", "prices": {"market": 880},  "ebay": {"psa10": {"avg": 987},  "psa9": {"avg": 410}}},
+    {"query": "Mewtwo V",        "name": "Mewtwo V",        "set": "s12a 195/172", "language": "JP", "prices": {"market": 650},  "ebay": {"psa10": {"avg": 747},  "psa9": {"avg": 330}}},
+    {"query": "Venusaur ex",     "name": "Venusaur ex",     "set": "sv3a 198/190", "language": "EN", "prices": {"market": 600},  "ebay": {"psa10": {"avg": 690},  "cgc95": {"avg": 653}}},
+    {"query": "Blastoise ex",    "name": "Blastoise ex",    "set": "sv3a 199/190", "language": "EN", "prices": {"market": 560},  "ebay": {"psa10": {"avg": 607},  "psa9": {"avg": 280}}},
+    {"query": "Marshadow",       "name": "Marshadow",       "set": "sm3 070/051",  "language": "JP", "prices": {"market": 420},  "ebay": {"psa10": {"avg": 760},  "psa9": {"avg": 493}}},
+    {"query": "Ditto V",         "name": "Ditto V",         "set": "s8b 264/184",  "language": "EN", "prices": {"market": 400},  "ebay": {"psa10": {"avg": 440},  "psa9": {"avg": 190}}},
+    {"query": "Charmander",      "name": "Charmander",      "set": "sv3a 167/190", "language": "EN", "prices": {"market": 360},  "ebay": {"psa10": {"avg": 393},  "psa9": {"avg": 160}}},
+    {"query": "Gyarados ex",     "name": "Gyarados ex",     "set": "sv4a 322/190", "language": "JP", "prices": {"market": 330},  "ebay": {"psa10": {"avg": 400},  "bgs9": {"avg": 347}}},
+    {"query": "Snorlax V",       "name": "Snorlax V",       "set": "s9a 091/067",  "language": "EN", "prices": {"market": 300},  "ebay": {"psa10": {"avg": 320},  "psa9": {"avg": 150}}},
+    {"query": "Rayquaza V",      "name": "Rayquaza V",      "set": "s7R 076/067",  "language": "EN", "prices": {"market": 280},  "ebay": {"psa10": {"avg": 300},  "psa9": {"avg": 140}}},
+    {"query": "Lillie",          "name": "Lillie",          "set": "sm9 119/114",  "language": "JP", "prices": {"market": 260},  "ebay": {"psa10": {"avg": 520},  "psa9": {"avg": 293}}},
+    {"query": "Dialga",          "name": "Dialga",          "set": "XY 019/018",   "language": "EN", "prices": {"market": 250},  "ebay": {"psa10": {"avg": 310},  "bgs9": {"avg": 273}}},
+    {"query": "Pikachu",         "name": "Pikachu",         "set": "s12a 205/172", "language": "EN", "prices": {"market": 245},  "ebay": {"psa10": {"avg": 268},  "psa9": {"avg": 120}}},
+    {"query": "Eevee",           "name": "Eevee",           "set": "sv2a 167/165", "language": "EN", "prices": {"market": 220},  "ebay": {"psa10": {"avg": 240},  "psa9": {"avg": 110}}},
+    {"query": "Mew",             "name": "Mew",             "set": "s12a 196/172", "language": "JP", "prices": {"market": 200},  "ebay": {"psa10": {"avg": 360},  "psa9": {"avg": 220}}}
+  ]
+}
