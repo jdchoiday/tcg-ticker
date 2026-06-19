@@ -5,10 +5,12 @@ name: ci
 # GitHub-hosted runner 는 브라우저/ffmpeg 설치가 되므로 원격 샌드박스와 달리 실렌더가 된다.
 
 on:
-  push:
-    branches: ["**"]
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   render-mock:
