@@ -1,0 +1,52 @@
+name: realrun
+
+# 실 PPT_API_KEY 로 전체 파이프라인을 1회 돌려 진짜 시세+카드사진 영상을 만든다.
+# 안전장치: 커밋 메시지에 [realrun] 이 있을 때만 실행(평소 푸시엔 안 돎 → 크레딧 보호).
+# secrets 는 동일 repo push 이벤트에 제공됨.
+
+on:
+  push:
+    branches: ["claude/**"]
+  workflow_dispatch:
+
+jobs:
+  real:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[realrun]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: run REAL pipeline (collect→validate→capture→caption)
+        env:
+          PPT_API_KEY: ${{ secrets.PPT_API_KEY }}
+        run: |
+          if [ -z "$PPT_API_KEY" ]; then
+            echo "::error::PPT_API_KEY secret 이 비어있음 — repo Settings→Secrets→Actions 에 PPT_API_KEY 등록 확인"
+            exit 1
+          fi
+          node scripts/pipeline.mjs
+
+      - name: show result (no secrets)
+        if: always()
+        run: |
+          echo "=== cards.json (상위 5) ==="
+          node -e 'const c=require("./data/cards.json");c.slice(0,5).forEach(x=>console.log(x.rank,x.nameKo,x.grade,"$"+Math.round(x.krw/1500),x.img?"[photo]":"[styled]"))' || true
+          echo "=== mp4 ==="; ls -la out/ticker.mp4 2>/dev/null || echo "no mp4"
+
+      - name: upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticker-REAL
+          path: |
+            out/ticker.mp4
+            out/caption.txt
+            data/cards.json
+          if-no-files-found: warn
