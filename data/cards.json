@@ -1,54 +1,6 @@
 [
   {
     "rank": 1,
-    "nameKo": "Pikachu Illustrator",
-    "nameEn": "Trophy Promo · 1998",
-    "set": "Illustrator Promo",
-    "rarity": "PROMO",
-    "type": "electric",
-    "lang": "JP",
-    "grade": "PSA 10",
-    "krw": 24750000000,
-    "img": null
-  },
-  {
-    "rank": 2,
-    "nameKo": "Charizard",
-    "nameEn": "Base Set · No Rarity Symbol",
-    "set": "Base Set (JP)",
-    "rarity": "Holo",
-    "type": "fire",
-    "lang": "JP",
-    "grade": "PSA 10",
-    "krw": 2550000000,
-    "img": null
-  },
-  {
-    "rank": 3,
-    "nameKo": "Charizard",
-    "nameEn": "1st Edition Holo",
-    "set": "Base Set 4/102",
-    "rarity": "Holo",
-    "type": "fire",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 675000000,
-    "img": null
-  },
-  {
-    "rank": 4,
-    "nameKo": "Lugia",
-    "nameEn": "Neo Genesis · 1st Edition",
-    "set": "Neo Genesis 9/111",
-    "rarity": "Holo",
-    "type": "psychic",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 195000000,
-    "img": null
-  },
-  {
-    "rank": 5,
     "nameKo": "Charizard ★",
     "nameEn": "Gold Star",
     "set": "Dragon Frontiers 100/101",
@@ -56,11 +8,11 @@
     "type": "fire",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 90000000,
+    "krw": 87000000,
     "img": null
   },
   {
-    "rank": 6,
+    "rank": 2,
     "nameKo": "Charizard",
     "nameEn": "Shadowless Holo",
     "set": "Base Set 4/102",
@@ -68,11 +20,11 @@
     "type": "fire",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 87000000,
+    "krw": 75000000,
     "img": null
   },
   {
-    "rank": 7,
+    "rank": 3,
     "nameKo": "Rayquaza ★",
     "nameEn": "Gold Star",
     "set": "EX Deoxys 107/107",
@@ -80,11 +32,11 @@
     "type": "dragon",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 73500000,
+    "krw": 69000000,
     "img": null
   },
   {
-    "rank": 8,
+    "rank": 4,
     "nameKo": "Umbreon ★",
     "nameEn": "Gold Star",
     "set": "POP Series 5 17/17",
@@ -92,35 +44,11 @@
     "type": "dark",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 72750000,
+    "krw": 66000000,
     "img": null
   },
   {
-    "rank": 9,
-    "nameKo": "Blastoise",
-    "nameEn": "1st Edition Holo",
-    "set": "Base Set 2/102",
-    "rarity": "Holo",
-    "type": "water",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 67500000,
-    "img": null
-  },
-  {
-    "rank": 10,
-    "nameKo": "Torchic ★",
-    "nameEn": "Gold Star",
-    "set": "Team Rocket Returns 100/109",
-    "rarity": "Gold Star",
-    "type": "fire",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 64800000,
-    "img": null
-  },
-  {
-    "rank": 11,
+    "rank": 5,
     "nameKo": "Venusaur",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 15/102",
@@ -128,23 +56,23 @@
     "type": "grass",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 48000000,
+    "krw": 45000000,
     "img": null
   },
   {
-    "rank": 12,
-    "nameKo": "Umbreon",
-    "nameEn": "Undaunted Holo",
-    "set": "Undaunted 47/90",
+    "rank": 6,
+    "nameKo": "Blastoise",
+    "nameEn": "1st Edition Holo",
+    "set": "Base Set 2/102",
     "rarity": "Holo",
-    "type": "dark",
+    "type": "water",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 37500000,
+    "krw": 40500000,
     "img": null
   },
   {
-    "rank": 13,
+    "rank": 7,
     "nameKo": "Espeon ★",
     "nameEn": "Gold Star",
     "set": "POP Series 5 16/17",
@@ -152,11 +80,23 @@
     "type": "psychic",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 33000000,
+    "krw": 30000000,
     "img": null
   },
   {
-    "rank": 14,
+    "rank": 8,
+    "nameKo": "Charizard",
+    "nameEn": "Base Set Holo",
+    "set": "Base Set 4/102",
+    "rarity": "Holo",
+    "type": "fire",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 18000000,
+    "img": null
+  },
+  {
+    "rank": 9,
     "nameKo": "Mewtwo",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 10/102",
@@ -164,11 +104,11 @@
     "type": "psychic",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 13500000,
+    "krw": 12000000,
     "img": null
   },
   {
-    "rank": 15,
+    "rank": 10,
     "nameKo": "Gyarados",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 6/102",
@@ -176,11 +116,11 @@
     "type": "water",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 11250000,
+    "krw": 9750000,
     "img": null
   },
   {
-    "rank": 16,
+    "rank": 11,
     "nameKo": "Umbreon VMAX",
     "nameEn": "Alt Art (Moonbreon)",
     "set": "Evolving Skies 215/203",
@@ -192,7 +132,19 @@
     "img": null
   },
   {
-    "rank": 17,
+    "rank": 12,
+    "nameKo": "Charizard VMAX",
+    "nameEn": "Rainbow Rare",
+    "set": "Champion's Path 074/073",
+    "rarity": "HR",
+    "type": "fire",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 2700000,
+    "img": null
+  },
+  {
+    "rank": 13,
     "nameKo": "Rayquaza VMAX",
     "nameEn": "Alt Art",
     "set": "Evolving Skies 218/203",
@@ -204,7 +156,7 @@
     "img": null
   },
   {
-    "rank": 18,
+    "rank": 14,
     "nameKo": "Giratina V",
     "nameEn": "Alt Art",
     "set": "Lost Origin 186/196",
@@ -212,7 +164,55 @@
     "type": "dragon",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 1800000,
+    "krw": 1875000,
+    "img": null
+  },
+  {
+    "rank": 15,
+    "nameKo": "Mew VMAX",
+    "nameEn": "Alt Art",
+    "set": "Fusion Strike 268/264",
+    "rarity": "SAR",
+    "type": "psychic",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 1650000,
+    "img": null
+  },
+  {
+    "rank": 16,
+    "nameKo": "Lugia V",
+    "nameEn": "Alt Art",
+    "set": "Silver Tempest 186/195",
+    "rarity": "SAR",
+    "type": "psychic",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 1500000,
+    "img": null
+  },
+  {
+    "rank": 17,
+    "nameKo": "Glaceon VMAX",
+    "nameEn": "Alt Art",
+    "set": "Evolving Skies 209/203",
+    "rarity": "SAR",
+    "type": "water",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 1425000,
+    "img": null
+  },
+  {
+    "rank": 18,
+    "nameKo": "Leafeon VMAX",
+    "nameEn": "Alt Art",
+    "set": "Evolving Skies 205/203",
+    "rarity": "SAR",
+    "type": "grass",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 1275000,
     "img": null
   }
 ]
