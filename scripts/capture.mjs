@@ -88,8 +88,10 @@ try {
   await sleep(400); // settle fonts/layout before the clean loop
 
   const loopSeconds = await page.evaluate(() => (window.CONFIG?.loopSeconds) ?? 60);
-  const seconds = Number(process.env.CAPTURE_SECONDS) || loopSeconds;
-  log(`recording ${seconds}s (loopSeconds=${loopSeconds})…`);
+  // 빠른 스크롤(작은 loopSeconds)이면 한 루프가 너무 짧으니 정수배로 ~18s 이상 녹화(이음새 유지)
+  const loops = Math.max(1, Math.round(18 / loopSeconds));
+  const seconds = Number(process.env.CAPTURE_SECONDS) || loops * loopSeconds;
+  log(`recording ${seconds}s (loopSeconds=${loopSeconds} ×${loops} loops)…`);
   await sleep(seconds * 1000);
 
   // closing the context flushes the .webm to disk

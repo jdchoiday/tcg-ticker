@@ -11,7 +11,7 @@ on:
 
 jobs:
   real:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[realrun]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[realrun]') || contains(github.event.head_commit.message, '[mockvid]')
     runs-on: ubuntu-latest
     permissions:
       contents: write   # 렌더된 mp4 를 repo 에 커밋(재생용)
@@ -25,15 +25,21 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
 
-      - name: run REAL pipeline (collect→validate→capture→caption)
+      - name: run pipeline (real, or --mock for [mockvid] design preview)
         env:
           PPT_API_KEY: ${{ secrets.PPT_API_KEY }}
+          MSG: ${{ github.event.head_commit.message }}
         run: |
-          if [ -z "$PPT_API_KEY" ]; then
-            echo "::error::PPT_API_KEY secret 이 비어있음 — repo Settings→Secrets→Actions 에 PPT_API_KEY 등록 확인"
-            exit 1
+          if echo "$MSG" | grep -q '\[mockvid\]'; then
+            echo "MOCK 디자인 프리뷰 렌더 (크레딧 미사용)"
+            node scripts/pipeline.mjs --mock
+          else
+            if [ -z "$PPT_API_KEY" ]; then
+              echo "::error::PPT_API_KEY secret 이 비어있음 — repo Settings→Secrets→Actions 에 PPT_API_KEY 등록 확인"
+              exit 1
+            fi
+            node scripts/pipeline.mjs
           fi
-          node scripts/pipeline.mjs
 
       - name: show result (no secrets)
         if: always()

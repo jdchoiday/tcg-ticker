@@ -172,6 +172,16 @@
   .col .rank .hash{color:var(--holo-a);}
   .col .rank .lbl{font-family:"Space Grotesk";font-weight:500;font-size:22px;color:var(--muted);}
 
+  /* ---- CTA banner (레일과 푸터 사이 빈 공간 후킹/CTA) ---- */
+  #cta{position:absolute;left:0;right:0;top:1632px;z-index:3;text-align:center;
+       padding:0 64px;}
+  #cta .big{font-size:46px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
+  #cta .big .accent{
+    background:linear-gradient(135deg,var(--holo-a),var(--holo-b));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  #cta .sub{margin-top:12px;font-size:28px;font-weight:600;color:var(--muted);}
+  #cta .sub b{color:var(--holo-a);}
+
   /* ---- footer ---- */
   #foot{position:absolute;bottom:0;left:0;right:0;z-index:3;
         padding:0 64px 56px;display:flex;justify-content:space-between;align-items:flex-end;}
@@ -206,6 +216,11 @@
 
     <div id="rail"><div id="track"></div></div>
 
+    <div id="cta">
+      <div class="big" id="ctaLine1"></div>
+      <div class="sub" id="ctaLine2"></div>
+    </div>
+
     <footer id="foot">
       <div class="fx" id="fxNote"></div>
       <div>
@@ -220,13 +235,15 @@
    CONFIG  — 브랜드/환율/속도. 자동화 파이프라인이 fx 를 덮어씀.
    ===================================================================== */
 const CONFIG = {
-  brandName : "TCG INDEX",      // ← 너의 브랜드명으로 교체
-  markText  : "TC",             // 로고 자리(2글자) — 실제 로고 PNG로 교체 가능
-  backWord  : "TCG",            // 뒷배경 흐릿한 워드마크
+  brandName : "VBM TCG Index",   // ← 헤드라인
+  markText  : "VBM",            // 로고 자리 — 실제 로고 PNG로 교체 가능
+  backWord  : "VBM",            // 뒷배경 흐릿한 워드마크
   subtitle  : "MOST EXPENSIVE GRADED POKÉMON CARDS",
-  handle    : "@your_handle",   // ← 채널 핸들
+  handle    : "@VBM",           // ← 채널 핸들
   tagline   : "Daily graded-card price index",
-  loopSeconds : 60,             // 스크롤 한 바퀴(작을수록 빠름). 눈 편한 값 50~75
+  ctaLine1  : "💎 Today's Grails, Ranked 🔥",        // 빈 공간 후킹 카피
+  ctaLine2  : "🔔 Follow @VBM — tomorrow's #1 drops daily 📈",
+  loopSeconds : 6,             // 스크롤 한 바퀴(작을수록 빠름). ×10 빠르게.
   dataUrl   : "../data/cards.json", // Phase 0: 데이터/뷰 분리. 실패 시 DEMO_CARDS 폴백.
   fx : {                        // 환율 (추정) — 기준일 표기됨
     date     : "2026-06-16",
@@ -328,6 +345,8 @@ function render(cards){
   document.getElementById("subtitle").textContent   = CONFIG.subtitle;
   document.getElementById("handle").textContent     = CONFIG.handle;
   document.getElementById("tagline").textContent    = CONFIG.tagline;
+  document.getElementById("ctaLine1").textContent   = CONFIG.ctaLine1;
+  document.getElementById("ctaLine2").textContent   = CONFIG.ctaLine2;
   document.getElementById("fxNote").innerHTML =
     `FX ${CONFIG.fx.date} · 1 USD = ₩${CONFIG.fx.krwPerUsd.toLocaleString()} = ₫${CONFIG.fx.vndPerUsd.toLocaleString()}<br>` +
     `<span style="opacity:.7">prices = estimate / demo data</span>`;
