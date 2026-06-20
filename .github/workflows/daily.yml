@@ -21,6 +21,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 렌더된 mp4 를 samples/ 에 커밋(재생용)
+    concurrency:
+      group: daily-ticker
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
 
@@ -58,3 +63,16 @@ jobs:
             out/ticker.mp4
             out/caption.txt
           if-no-files-found: warn
+
+      # 매일 렌더된 영상을 samples/ 로 커밋 → GitHub 에서 바로 재생/확인
+      - name: publish playable mp4 to repo
+        if: success()
+        run: |
+          mkdir -p samples
+          cp out/ticker.mp4 samples/ticker-latest.mp4
+          cp out/caption.txt samples/caption-latest.txt || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f samples/ticker-latest.mp4 samples/caption-latest.txt
+          git commit -m "chore: daily ticker mp4 (auto)" || { echo "변경 없음"; exit 0; }
+          git push origin HEAD:${{ github.ref_name }}
