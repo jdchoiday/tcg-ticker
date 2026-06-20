@@ -71,7 +71,7 @@ async function postToBuffer({ token, channelIds, caption, videoUrl }) {
       text: caption,
       schedulingType: "automatic",
       mode: MODE,
-      assets: [{ type: "video", url: videoUrl }],
+      assets: [{ url: videoUrl }],
     };
     const json = await gql(token, mutation, { input });
     results.push({ channelId, json });
