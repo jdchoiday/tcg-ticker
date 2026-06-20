@@ -49,6 +49,17 @@ try {
     printChannels(o.name, o.channels || []);
   }
   console.log("\n→ 위에서 TikTok 채널의 id 를 GitHub Secret BUFFER_PROFILE_IDS 에 넣으세요(여러 개면 쉼표).");
+
+  // ── 스키마 introspection (publish.mjs 입력 형식 확정용) ──
+  const s = await gql(`query{
+    asset: __type(name:"AssetInput"){ inputFields{ name type{ name kind ofType{ name kind } } } }
+    mode:  __type(name:"ShareMode"){ enumValues{ name } }
+    post:  __type(name:"CreatePostInput"){ inputFields{ name type{ name kind ofType{ name kind } } } }
+  }`);
+  console.log("\n=== SCHEMA ===");
+  console.log("AssetInput.inputFields:", JSON.stringify(s.asset?.inputFields));
+  console.log("ShareMode.enumValues:", JSON.stringify(s.mode?.enumValues));
+  console.log("CreatePostInput.inputFields:", JSON.stringify(s.post?.inputFields));
 } catch (e) {
   console.error("✗", e.message);
   process.exit(1);
