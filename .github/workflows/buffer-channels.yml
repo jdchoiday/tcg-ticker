@@ -1,0 +1,28 @@
+name: buffer-channels
+
+# Buffer 연결 채널 목록(id/service)을 출력해 BUFFER_PROFILE_IDS 값을 확인.
+# 커밋 메시지에 [bufferids] 있을 때만 실행. 토큰은 로그에 안 찍힘.
+
+on:
+  push:
+    branches: ["claude/**"]
+  workflow_dispatch:
+
+jobs:
+  channels:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[bufferids]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: list buffer channels
+        env:
+          BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+        run: |
+          if [ -z "$BUFFER_ACCESS_TOKEN" ]; then
+            echo "::error::BUFFER_ACCESS_TOKEN secret 비어있음"
+            exit 1
+          fi
+          node scripts/buffer-channels.mjs

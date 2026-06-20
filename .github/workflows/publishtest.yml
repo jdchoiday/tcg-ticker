@@ -1,0 +1,28 @@
+name: publishtest
+
+# Buffer 발행 통합 테스트. [publishtest] 커밋일 때만.
+# 안전: BUFFER_MODE=addToDrafts → Buffer 에 '초안'으로만 생성(자동 게시 안 됨).
+# 기존 samples/ticker-latest.mp4 의 공개 raw URL 을 사용(재렌더/크레딧 없음).
+
+on:
+  push:
+    branches: ["claude/**"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publishtest]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: publish to Buffer (DRAFT)
+        env:
+          BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+          BUFFER_PROFILE_IDS: ${{ secrets.BUFFER_PROFILE_IDS }}
+          BUFFER_MODE: addToQueue
+          BUFFER_SAVE_DRAFT: "1"
+          PUBLISH_VIDEO_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/samples/ticker-latest.mp4
+        run: node scripts/publish.mjs --confirm
