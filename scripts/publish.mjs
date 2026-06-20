@@ -70,8 +70,9 @@ async function postToBuffer({ token, channelIds, caption, videoUrl }) {
       channelId,
       text: caption,
       schedulingType: "automatic",
-      mode: MODE,
-      assets: [{ url: videoUrl }],
+      mode: MODE,                                   // ShareMode: addToQueue|shareNow|shareNext|customScheduled
+      assets: [{ video: { url: videoUrl } }],       // VideoAssetInput { url(필수), thumbnailUrl?, metadata? }
+      ...(process.env.BUFFER_SAVE_DRAFT === "1" ? { saveToDraft: true } : {}), // 안전 테스트=초안
     };
     const json = await gql(token, mutation, { input });
     results.push({ channelId, json });
