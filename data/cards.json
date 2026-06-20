@@ -13,18 +13,6 @@
   },
   {
     "rank": 2,
-    "nameKo": "Charizard",
-    "nameEn": "Shadowless Holo",
-    "set": "Base Set 4/102",
-    "rarity": "Holo",
-    "type": "fire",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 75000000,
-    "img": null
-  },
-  {
-    "rank": 3,
     "nameKo": "Rayquaza ★",
     "nameEn": "Gold Star",
     "set": "EX Deoxys 107/107",
@@ -36,7 +24,7 @@
     "img": null
   },
   {
-    "rank": 4,
+    "rank": 3,
     "nameKo": "Umbreon ★",
     "nameEn": "Gold Star",
     "set": "POP Series 5 17/17",
@@ -48,7 +36,7 @@
     "img": null
   },
   {
-    "rank": 5,
+    "rank": 4,
     "nameKo": "Venusaur",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 15/102",
@@ -60,7 +48,7 @@
     "img": null
   },
   {
-    "rank": 6,
+    "rank": 5,
     "nameKo": "Blastoise",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 2/102",
@@ -72,7 +60,7 @@
     "img": null
   },
   {
-    "rank": 7,
+    "rank": 6,
     "nameKo": "Espeon ★",
     "nameEn": "Gold Star",
     "set": "POP Series 5 16/17",
@@ -84,19 +72,7 @@
     "img": null
   },
   {
-    "rank": 8,
-    "nameKo": "Charizard",
-    "nameEn": "Base Set Holo",
-    "set": "Base Set 4/102",
-    "rarity": "Holo",
-    "type": "fire",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 18000000,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/233294_in_400x400.jpg"
-  },
-  {
-    "rank": 9,
+    "rank": 7,
     "nameKo": "Mewtwo",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 10/102",
@@ -108,7 +84,7 @@
     "img": null
   },
   {
-    "rank": 10,
+    "rank": 8,
     "nameKo": "Gyarados",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 6/102",
@@ -120,7 +96,7 @@
     "img": null
   },
   {
-    "rank": 11,
+    "rank": 9,
     "nameKo": "Umbreon VMAX",
     "nameEn": "Alt Art (Moonbreon)",
     "set": "Evolving Skies 215/203",
@@ -132,19 +108,7 @@
     "img": null
   },
   {
-    "rank": 12,
-    "nameKo": "Charizard VMAX",
-    "nameEn": "Rainbow Rare",
-    "set": "Champion's Path 074/073",
-    "rarity": "HR",
-    "type": "fire",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 2700000,
-    "img": null
-  },
-  {
-    "rank": 13,
+    "rank": 10,
     "nameKo": "Rayquaza VMAX",
     "nameEn": "Alt Art",
     "set": "Evolving Skies 218/203",
@@ -156,7 +120,19 @@
     "img": null
   },
   {
-    "rank": 14,
+    "rank": 11,
+    "nameKo": "Charizard",
+    "nameEn": "Base Set Holo",
+    "set": "Base Set 4/102",
+    "rarity": "Holo",
+    "type": "fire",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 2344500,
+    "img": "https://tcgplayer-cdn.tcgplayer.com/product/106999_in_400x400.jpg"
+  },
+  {
+    "rank": 12,
     "nameKo": "Giratina V",
     "nameEn": "Alt Art",
     "set": "Lost Origin 186/196",
@@ -168,7 +144,7 @@
     "img": null
   },
   {
-    "rank": 15,
+    "rank": 13,
     "nameKo": "Mew VMAX",
     "nameEn": "Alt Art",
     "set": "Fusion Strike 268/264",
@@ -180,7 +156,7 @@
     "img": null
   },
   {
-    "rank": 16,
+    "rank": 14,
     "nameKo": "Lugia V",
     "nameEn": "Alt Art",
     "set": "Silver Tempest 186/195",
@@ -192,7 +168,7 @@
     "img": null
   },
   {
-    "rank": 17,
+    "rank": 15,
     "nameKo": "Glaceon VMAX",
     "nameEn": "Alt Art",
     "set": "Evolving Skies 209/203",
@@ -204,7 +180,7 @@
     "img": null
   },
   {
-    "rank": 18,
+    "rank": 16,
     "nameKo": "Leafeon VMAX",
     "nameEn": "Alt Art",
     "set": "Evolving Skies 205/203",
@@ -214,5 +190,29 @@
     "grade": "PSA 10",
     "krw": 1275000,
     "img": null
+  },
+  {
+    "rank": 17,
+    "nameKo": "Charizard ex",
+    "nameEn": "Special Illustration Rare",
+    "set": "Obsidian Flames 223/197",
+    "rarity": "SIR",
+    "type": "fire",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 675000,
+    "img": null
+  },
+  {
+    "rank": 18,
+    "nameKo": "Charizard VMAX",
+    "nameEn": "Rainbow Rare",
+    "set": "Champion's Path 074/073",
+    "rarity": "HR",
+    "type": "fire",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 501000,
+    "img": "https://tcgplayer-cdn.tcgplayer.com/product/223073_in_400x400.jpg"
   }
 ]

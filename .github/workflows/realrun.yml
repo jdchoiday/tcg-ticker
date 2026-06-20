@@ -9,6 +9,11 @@ on:
     branches: ["claude/**"]
   workflow_dispatch:
 
+# 동시 실행 방지(크레딧 이중 소모 차단). 새 실행이 진행 중 실행을 취소.
+concurrency:
+  group: realrun
+  cancel-in-progress: true
+
 jobs:
   real:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[realrun]') || contains(github.event.head_commit.message, '[mockvid]')

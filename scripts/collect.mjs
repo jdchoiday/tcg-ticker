@@ -114,6 +114,7 @@ async function main() {
 
   const rows = [];
   let auth401 = false;
+  const seenIds = new Set();
   for (const it of wl.cards) {
     let card;
     try {
@@ -132,6 +133,13 @@ async function main() {
 
     const got = pickGradedUsd(card, it.grade);
     if (!got) { warn(`시세 없음: ${it.query} (${it.grade}) — 위 매칭 상품에 ${gradeKey(it.grade)} 거래데이터 없음`); continue; }
+
+    // 중복 방지: 서로 다른 쿼리가 같은 상품으로 수렴하면 1장만
+    const pid = card.tcgPlayerId;
+    if (pid != null) {
+      if (seenIds.has(pid)) { warn(`중복 상품 스킵: ${it.query} (#${pid})`); continue; }
+      seenIds.add(pid);
+    }
 
     const krw = Math.round(got.usd * KRW_PER_USD);
     rows.push({
