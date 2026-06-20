@@ -1,0 +1,78 @@
+name: daily-ticker
+
+# Phase 4 스케줄러. GitHub-hosted runner 는 네트워크/브라우저 설치가 가능해
+# 이 레포의 영상 파이프라인이 실제로 돈다(원격 샌드박스와 달리).
+# 대안: Railway cron 에서 `npm ci && npx playwright install --with-deps chromium && npm run pipeline` 동일.
+
+on:
+  schedule:
+    - cron: "0 21 * * *"   # 매일 21:00 UTC (= KST 06:00). 필요 시 조정.
+  workflow_dispatch:        # 수동 실행
+    inputs:
+      mock:
+        description: "fixtures 로 수집(키 없이)"
+        type: boolean
+        default: false
+      publish:
+        description: "발행까지 실행(시크릿 필요)"
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 렌더된 mp4 를 samples/ 에 커밋(재생용)
+    concurrency:
+      group: daily-ticker
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: install deps
+        run: npm ci
+
+      - name: install chromium + system deps
+        run: npx playwright install --with-deps chromium
+
+      - name: install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: run pipeline
+        env:
+          PPT_API_KEY: ${{ secrets.PPT_API_KEY }}
+          BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+          BUFFER_PROFILE_IDS: ${{ secrets.BUFFER_PROFILE_IDS }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.mock }}" = "true" ]; then ARGS="$ARGS --mock"; fi
+          if [ "${{ inputs.publish }}" = "true" ]; then ARGS="$ARGS --publish --confirm"; fi
+          node scripts/pipeline.mjs $ARGS
+
+      - name: upload mp4
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticker-mp4
+          path: |
+            out/ticker.mp4
+            out/caption.txt
+          if-no-files-found: warn
+
+      # 매일 렌더된 영상을 samples/ 로 커밋 → GitHub 에서 바로 재생/확인
+      - name: publish playable mp4 to repo
+        if: success()
+        run: |
+          mkdir -p samples
+          cp out/ticker.mp4 samples/ticker-latest.mp4
+          cp out/caption.txt samples/caption-latest.txt || true
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f samples/ticker-latest.mp4 samples/caption-latest.txt
+          git commit -m "chore: daily ticker mp4 (auto)" || { echo "변경 없음"; exit 0; }
+          git push origin HEAD:${{ github.ref_name }}

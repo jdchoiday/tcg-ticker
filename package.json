@@ -9,7 +9,11 @@
     "validate": "node scripts/validate.mjs",
     "collect": "node scripts/collect.mjs",
     "collect:mock": "node scripts/collect.mjs --mock",
-    "capture": "node scripts/capture.mjs"
+    "capture": "node scripts/capture.mjs",
+    "caption": "node scripts/caption.mjs",
+    "publish": "node scripts/publish.mjs",
+    "pipeline": "node scripts/pipeline.mjs",
+    "pipeline:mock": "node scripts/pipeline.mjs --mock"
   },
   "devDependencies": {
     "playwright": "^1.49.0"

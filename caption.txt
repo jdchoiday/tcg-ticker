@@ -1,11 +1,11 @@
-📈 등급 포켓몬 카드 시세 TOP 18 — {{date}}
-PSA·BGS·CGC graded price index
+💎 Most Expensive Graded Pokémon Cards — TOP 18
+{{date}} · PSA 10 market ranking
 
-오늘의 1위: {{top1_nameKo}} ({{top1_grade}}) → {{top1_usd}}
-전체 랭킹은 영상에서 확인 👀
+🥇 Today's #1: {{top1_nameKo}} {{top1_grade}} → {{top1_usd}}
+Full Top 18 in the video 👀
 
-💱 FX {{fx_date}} · 1 USD = ₩{{krwPerUsd}} = ₫{{vndPerUsd}}
-※ 시세는 추정치 / 참고용 (not financial advice)
+💱 FX ref {{fx_date}} · prices in USD (₫VND shown in-video)
+※ Estimates, for reference only — not financial advice
 
-#포켓몬카드 #PSA #등급카드 #pokemoncards #gradedcards #psa10
-#tcg #pokemontcg #cardcollector #포켓몬 #리자몽 #charizard
+#pokemoncards #pokemontcg #psa10 #gradedcards #PSA
+#tcg #cardcollector #megaevolution #pokemoninvesting #charizard

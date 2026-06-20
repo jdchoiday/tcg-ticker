@@ -7,6 +7,8 @@
 
 ## ⚙️ BUILD STATUS  `[updated 2026-06-19]`
 
+> ⚠️ 원격(웹) 세션 제약: chromium 다운로드 호스트가 egress allowlist 밖이라 **이 환경에선 영상 실렌더 불가**. 영상화는 로컬 또는 GitHub Actions(`.github/workflows/daily.yml`)/Railway 에서 돈다.
+
 | Phase | 내용 | 상태 |
 |---|---|---|
 | 렌더 엔진 | `src/ticker.html` — 무한 스크롤, 등급/USD/VND/순위, 9:16 | ✅ |
@@ -14,8 +16,8 @@
 | Phase 0 | `data/cards.schema.json` + `scripts/validate.mjs` (무의존 validator) | ✅ |
 | **Phase 1** | 수동 18장 `data/cards.json` + `caption.txt` 템플릿 | ✅ |
 | **Phase 2** | `scripts/capture.mjs` — Playwright 녹화 → ffmpeg → `out/ticker.mp4` | ✅ |
-| **Phase 3** | 수집기 `scripts/collect.mjs` (PokemonPriceTracker) + `watchlist.json` | 🟡 골격+mock 검증. 키 발급 후 실응답 매핑 확정 필요 |
-| Phase 4 | 스케줄(cron) + 발행(TikTok/Shorts 직전까지) | ❌ |
+| **Phase 3** | 수집기 `scripts/collect.mjs` (PokemonPriceTracker) + `watchlist.json` | 🟢 OpenAPI v2 명세로 매핑 확정(엔드포인트/파라미터/`ebay.salesByGrade.psa10`). 키만 꽂으면 실데이터. 명세: `docs/ppt-openapi-v2.json` |
+| **Phase 4** | 오케스트레이터 `pipeline.mjs` + 캡션렌더 `caption.mjs` + 발행 스캐폴드 `publish.mjs` + 스케줄러 `.github/workflows/daily.yml` | 🟡 파이프라인/캡션/스케줄 동작. 발행은 dry-run까지(Buffer 토큰 발급 후 실전송 가드 해제 필요) |
 
 ### 데이터 소스 = PokemonPriceTracker (확정)
 조사·정밀검증 완료. **유일하게 약관(§6)이 "콘텐츠에 가격 표시"를 명시 허용**(출처표기 의무 없음), 무료 티어부터 PSA 등급가 제공, EN/JP 지원(**KR 미지원**). 카드 이미지는 포켓몬사 IP → **가격 텍스트 + 자체 스타일카드만**. 상세: 메모리 `project_tcg_data_source_research`.
@@ -30,13 +32,23 @@ npm run validate                    # cards.json 스키마 검증
 npm run serve                       # http://localhost:4173 미리보기
 npm run capture                     # out/ticker.mp4 생성 (한 루프 = CONFIG.loopSeconds)
 CAPTURE_SECONDS=6 npm run capture   # 짧은 테스트 클립
+npm run caption                     # caption.txt → out/caption.txt (placeholder 치환)
+npm run publish                     # 발행 dry-run (토큰+--confirm 없으면 전송 안 함)
+npm run pipeline                    # collect→validate→capture→caption 한 번에 (실 API)
+npm run pipeline:mock               # 위를 fixtures 로 (키 불필요)
+node scripts/pipeline.mjs --mock --no-video --publish  # chromium 없는 환경 검증용
 ```
 
-### Phase 3 키 발급 후 할 일 (collect.mjs 의 TODO)
-1. `.env.example` → `.env` 복사 후 `PPT_API_KEY` 입력 (https://www.pokemonpricetracker.com 무료 가입)
-2. 실응답 1건으로 **BASE_URL/엔드포인트/쿼리 파라미터** 확정 (`collect.mjs` 상단)
-3. 실응답으로 **등급가 키 구조**(`ebay.psa10.avg` 등) 확정 → `pickGradedUsd()` 와 `fixtures/ppt_sample.json` 교체
-4. `watchlist.json` 을 EN/JP 중심으로 재구성 (KR 미지원), `query` 를 실제 검색되는 영문명으로 보정
+### Phase 4 발행(Buffer) 토큰 발급 후 할 일 (publish.mjs 의 TODO)
+1. `.env` 에 `BUFFER_ACCESS_TOKEN`, `BUFFER_PROFILE_IDS`(쉼표구분) 입력
+2. Buffer 영상 발행 멀티스텝(미디어 업로드 → updates/create) 실응답으로 확정 → `postToBuffer()` 스텁 교체
+3. GitHub Actions 시크릿(`PPT_API_KEY`/`BUFFER_*`) 등록 후 `daily.yml` cron 시각 조정
+
+### Phase 3 키 발급 후 할 일 (매핑은 명세로 확정됨 — 남은 건 키 + 정밀화)
+1. `PPT_API_KEY` 를 GitHub Secrets(또는 `.env`)에 입력 (https://www.pokemonpricetracker.com 무료 가입)
+2. `npm run collect` 1회 실행 → 18장 실응답 확인 (매핑/등급가 경로는 이미 명세대로 구현됨)
+3. 첫 실응답에서 각 카드의 **tcgPlayerId** 를 받아 `watchlist.json` 에 넣으면 검색 모호성 제거 + 결정적·저비용(단건 1크레딧). collect.mjs 가 tcgPlayerId 있으면 우선 사용.
+4. 9.5 등급 등 `salesByGrade` 키 표기(`bgs9_5` 가정)는 실응답으로 1회 확인
 
 ---
 
@@ -79,10 +91,16 @@ out/                 mp4 산출물 (gitignore)
 .env                 BUFFER_TOKEN, SUPABASE_URL 등 (커밋 금지)
 ```
 
-## 8. 미해결 결정 — JD 확정 필요
-1. **가격 데이터 소스** (최대 블로커): 어디서 등급 시세를 가져올지. 스크래핑 가능 여부·API 유무.
-2. 타깃 시장·언어 (KR/VN/EN) → 캡션·해시태그·VND 비중.
-3. 브랜드명·채널 핸들 확정 (`CONFIG.brandName`, `handle`).
-4. 카드 이미지 소스: 자가촬영 vs 라이선스 vs 텍스트형 카드 유지.
+## 8. 결정 현황  `[updated 2026-06-19]`
+1. **가격 데이터 소스** → ✅ PokemonPriceTracker (무료 100c/day, PSA 등급가, 약관상 가격표시 허용). 백업 후보 PokeTrace.
+2. **타깃 언어** → ✅ EN (영어). 캡션/해시태그 영어. (시장 세부는 추후)
+3. **브랜드명·채널 핸들** → 🟡 추후공지. `CONFIG.brandName="TCG INDEX"`, `handle="@your_handle"` placeholder 유지.
+4. **카드 이미지 소스** → 🔴 실제 사진 ON(`watchlist.cardImages:true`, API `imageCdnUrl`). JD 리스크 감수 결정. ⚠️ 포켓몬/TCGPlayer IP — 수익화 시 저작권/ToS 본인 책임(§6과 상충, 의식적 선택). 권리정리 이미지는 카드별 `img`로 우선 적용 가능.
+5. **콘텐츠 방향** → ✅ 최고등급(PSA 10)·**가격 높은 카드 중심**(빈티지 그레일 + 프리미엄 모던 alt-art). `data/watchlist.json` 스타터 리스트(Illustrator·1st Ed Charizard·Gold Star·Moonbreon 등). USD/VND 포맷 M/B/T 약어 지원.
 
-`[판단: Phase 0~2 완료. 다음 트리거 = §8-1 데이터 소스 확보 시 Phase 3 GO]`
+### 남은 액션(외부 계정 — JD 직접):
+- PPT 가입 → `PPT_API_KEY` 발급 → GitHub Secrets 등록
+- Buffer 가입 + TikTok 연결 → `BUFFER_ACCESS_TOKEN`/`BUFFER_PROFILE_IDS` → GitHub Secrets
+- 채널명/핸들 확정 시 `CONFIG.brandName`/`handle` 교체
+
+`[판단: Phase 0~4 골격 완료 + 영어 화제카드 워치리스트 구성. 다음 트리거 = PPT 키 → 실응답 매핑 확정(Phase 3) → Buffer 토큰 → 실발행(Phase 4)]`

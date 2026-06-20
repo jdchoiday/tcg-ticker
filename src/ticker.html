@@ -172,6 +172,16 @@
   .col .rank .hash{color:var(--holo-a);}
   .col .rank .lbl{font-family:"Space Grotesk";font-weight:500;font-size:22px;color:var(--muted);}
 
+  /* ---- CTA banner (레일과 푸터 사이 빈 공간 후킹/CTA) ---- */
+  #cta{position:absolute;left:0;right:0;top:1632px;z-index:3;text-align:center;
+       padding:0 64px;}
+  #cta .big{font-size:46px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
+  #cta .big .accent{
+    background:linear-gradient(135deg,var(--holo-a),var(--holo-b));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  #cta .sub{margin-top:12px;font-size:28px;font-weight:600;color:var(--muted);}
+  #cta .sub b{color:var(--holo-a);}
+
   /* ---- footer ---- */
   #foot{position:absolute;bottom:0;left:0;right:0;z-index:3;
         padding:0 64px 56px;display:flex;justify-content:space-between;align-items:flex-end;}
@@ -206,6 +216,11 @@
 
     <div id="rail"><div id="track"></div></div>
 
+    <div id="cta">
+      <div class="big" id="ctaLine1"></div>
+      <div class="sub" id="ctaLine2"></div>
+    </div>
+
     <footer id="foot">
       <div class="fx" id="fxNote"></div>
       <div>
@@ -220,13 +235,15 @@
    CONFIG  — 브랜드/환율/속도. 자동화 파이프라인이 fx 를 덮어씀.
    ===================================================================== */
 const CONFIG = {
-  brandName : "TCG INDEX",      // ← 너의 브랜드명으로 교체
-  markText  : "TC",             // 로고 자리(2글자) — 실제 로고 PNG로 교체 가능
-  backWord  : "TCG",            // 뒷배경 흐릿한 워드마크
-  subtitle  : "POKÉMON TCG · GRADED PRICE RANKING",
-  handle    : "@your_handle",   // ← 채널 핸들
+  brandName : "VBM TCG Index",   // ← 헤드라인
+  markText  : "VBM",            // 로고 자리 — 실제 로고 PNG로 교체 가능
+  backWord  : "VBM",            // 뒷배경 흐릿한 워드마크
+  subtitle  : "MOST EXPENSIVE GRADED POKÉMON CARDS",
+  handle    : "@VBMTCGKWZ",     // ← 채널 핸들
   tagline   : "Daily graded-card price index",
-  loopSeconds : 60,             // 스크롤 한 바퀴(작을수록 빠름). 눈 편한 값 50~75
+  ctaLine1  : "💎 Today's Grails, Ranked 🔥",        // 빈 공간 후킹 카피
+  ctaLine2  : "🔔 @VBMTCGKWZ 팔로우 📈",
+  loopSeconds : 20,            // 스크롤 한 바퀴(작을수록 빠름). 원본 60의 ×3 속도.
   dataUrl   : "../data/cards.json", // Phase 0: 데이터/뷰 분리. 실패 시 DEMO_CARDS 폴백.
   fx : {                        // 환율 (추정) — 기준일 표기됨
     date     : "2026-06-16",
@@ -239,10 +256,10 @@ window.CONFIG = CONFIG;
 
 /* DEMO 폴백 — file:// 직접 열기 또는 cards.json fetch 실패 시에만 사용 */
 const DEMO_CARDS = [
-  {rank:1, nameKo:"리자몽 VSTAR UR", nameEn:"Charizard VSTAR UR", set:"s12a 212/172", rarity:"UR", type:"fire",    lang:"JP", grade:"PSA 10", pop:"POP 41", krw:6800000},
-  {rank:2, nameKo:"리자몽 ex SAR",   nameEn:"Charizard ex SAR",   set:"sv3a 200/190", rarity:"SAR",type:"fire",    lang:"KR", grade:"PSA 10", pop:"POP 88", krw:2400000},
-  {rank:3, nameKo:"뮤 VMAX HR",      nameEn:"Mew VMAX HR",        set:"s8b 268/184",  rarity:"HR", type:"psychic", lang:"JP", grade:"BGS 9.5",pop:"POP 12", krw:1950000},
-  {rank:4, nameKo:"피카츄 AR",       nameEn:"Pikachu AR",         set:"s12a 205/172", rarity:"AR", type:"electric",lang:"KR", grade:"PSA 10", pop:"POP 210",krw:402000},
+  {rank:1, nameKo:"Charizard ★", nameEn:"Gold Star",       set:"Dragon Frontiers 100/101", rarity:"Gold Star", type:"fire",   lang:"EN", grade:"PSA 10", krw:87000000},
+  {rank:2, nameKo:"Charizard",   nameEn:"Shadowless Holo", set:"Base Set 4/102",           rarity:"Holo",      type:"fire",   lang:"EN", grade:"PSA 10", krw:75000000},
+  {rank:3, nameKo:"Rayquaza ★",  nameEn:"Gold Star",       set:"EX Deoxys 107/107",        rarity:"Gold Star", type:"dragon", lang:"EN", grade:"PSA 10", krw:69000000},
+  {rank:4, nameKo:"Umbreon ★",   nameEn:"Gold Star",       set:"POP Series 5 17/17",       rarity:"Gold Star", type:"dark",   lang:"EN", grade:"PSA 10", krw:66000000},
 ];
 
 /* ---- type → color ---- */
@@ -257,9 +274,14 @@ const TYPE_GLYPH = {
 };
 
 /* ---- helpers ---- */
-const fmtUsd = n => "$"+Math.round(n).toLocaleString("en-US");
+const fmtUsd = n => {
+  if(n>=1e6) return "$"+(n/1e6).toFixed(2).replace(/\.?0+$/,"")+"M";  // 고가 그레일: $16.5M
+  return "$"+Math.round(n).toLocaleString("en-US");
+};
 const fmtVnd = n => {
-  if(n>=1e6) return "₫"+(n/1e6).toFixed(2).replace(/\.?0+$/,"")+"M";
+  if(n>=1e12) return "₫"+(n/1e12).toFixed(2).replace(/\.?0+$/,"")+"T";
+  if(n>=1e9 ) return "₫"+(n/1e9 ).toFixed(2).replace(/\.?0+$/,"")+"B";
+  if(n>=1e6 ) return "₫"+(n/1e6 ).toFixed(2).replace(/\.?0+$/,"")+"M";
   return "₫"+Math.round(n).toLocaleString("en-US");
 };
 
@@ -323,6 +345,8 @@ function render(cards){
   document.getElementById("subtitle").textContent   = CONFIG.subtitle;
   document.getElementById("handle").textContent     = CONFIG.handle;
   document.getElementById("tagline").textContent    = CONFIG.tagline;
+  document.getElementById("ctaLine1").textContent   = CONFIG.ctaLine1;
+  document.getElementById("ctaLine2").textContent   = CONFIG.ctaLine2;
   document.getElementById("fxNote").innerHTML =
     `FX ${CONFIG.fx.date} · 1 USD = ₩${CONFIG.fx.krwPerUsd.toLocaleString()} = ₫${CONFIG.fx.vndPerUsd.toLocaleString()}<br>` +
     `<span style="opacity:.7">prices = estimate / demo data</span>`;
