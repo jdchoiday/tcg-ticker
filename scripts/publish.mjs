@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 /**
- * publish.mjs — Phase 4: out/ticker.mp4 + out/caption.txt → 소셜 발행(스캐폴드).
+ * publish.mjs — Phase 4: 렌더된 영상 + 캡션 → Buffer(→ TikTok) 발행.
  *
- * 기본 동작은 **dry-run**: 산출물(mp4/caption) 존재를 검증하고 "무엇을 어디로 올릴지"
- * 플랜만 출력한다. 실제 업로드는 토큰(BUFFER_ACCESS_TOKEN)과 `--confirm` 이 둘 다
- * 있을 때만 시도한다(사고 방지).
+ * Buffer 새 GraphQL API(https://api.buffer.com)는 영상 "직접 업로드"는 베타 미지원이라,
+ * **공개 영상 URL**(public repo 의 raw URL)을 assets 로 넘긴다.
+ *
+ * 환경:
+ *   BUFFER_ACCESS_TOKEN   개인 API 키 (Bearer)
+ *   BUFFER_PROFILE_IDS    채널 id(쉼표구분)  ※ TikTok 채널 id
+ *   PUBLISH_VIDEO_URL     공개 mp4 URL (예: raw.githubusercontent.com/.../samples/ticker-latest.mp4)
+ *   BUFFER_MODE           addToQueue(기본) | shareNow | addToDrafts  ← 안전 테스트는 addToDrafts
  *
  * 사용:
  *   node scripts/publish.mjs                 # dry-run (네트워크 호출 없음)
- *   node scripts/publish.mjs --confirm       # 실제 발행 (BUFFER_ACCESS_TOKEN 필요)
- *
- * 발행 경로 = Buffer(→ TikTok/Shorts 연결). 무료 가입 후 토큰/프로필ID 발급:
- *   BUFFER_ACCESS_TOKEN, BUFFER_PROFILE_IDS(쉼표구분) 를 .env 에.
- *
- * ⚠️ TODO(토큰 발급 후 확정): Buffer 영상 업로드는 멀티스텝(미디어 업로드 → update 생성).
- *    아래 postToBuffer() 의 엔드포인트/페이로드를 실제 응답으로 확정하고 가드를 풀 것.
+ *   node scripts/publish.mjs --confirm       # 실제 createPost 호출
  */
 import { readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -26,12 +25,13 @@ const ROOT = resolve(__dirname, "..");
 const OUT = join(ROOT, "out");
 const VIDEO = join(OUT, "ticker.mp4");
 const CAPTION = join(OUT, "caption.txt");
+const API = "https://api.buffer.com";
 
 const CONFIRM = process.argv.includes("--confirm");
+const MODE = process.env.BUFFER_MODE || "addToQueue";
 const log = (...a) => console.log("[publish]", ...a);
 const warn = (...a) => console.warn("[publish] ⚠", ...a);
 
-/* ---- .env 무의존 로더 (collect.mjs 와 동일 규칙) ---- */
 async function loadEnv() {
   try {
     const txt = await readFile(resolve(ROOT, ".env"), "utf8");
@@ -41,62 +41,73 @@ async function loadEnv() {
     }
   } catch { /* .env 없으면 무시 */ }
 }
-
 const exists = (p) => stat(p).then(() => true).catch(() => false);
-const fmtMB = (bytes) => (bytes / 1024 / 1024).toFixed(2) + " MB";
+const fmtMB = (b) => (b / 1024 / 1024).toFixed(2) + " MB";
 
-/* ---- 실 발행 (가드 뒤). 토큰 발급 후 엔드포인트/페이로드 확정 필요 ---- */
-async function postToBuffer({ token, profileIds, caption /*, videoPath */ }) {
-  // TODO: Buffer 영상 발행은 (1) 미디어 업로드 → (2) updates/create 멀티스텝.
-  //       실응답 1건으로 엔드포인트/필드 확정 후 아래 스텁을 교체할 것.
-  const url = "https://api.bufferapp.com/1/updates/create.json";
-  const body = new URLSearchParams();
-  body.set("access_token", token);
-  for (const id of profileIds) body.append("profile_ids[]", id);
-  body.set("text", caption);
-  // body.set("media[video]", <uploaded-media-id>);  // ← 미디어 업로드 후 채움
-  const res = await fetch(url, { method: "POST", body });
-  if (!res.ok) throw new Error(`Buffer HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  return res.json();
+/* ---- Buffer GraphQL ---- */
+async function gql(token, query, variables) {
+  const res = await fetch(API, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables }),
+  });
+  const text = await res.text();
+  let json; try { json = JSON.parse(text); } catch { throw new Error(`HTTP ${res.status}: ${text.slice(0, 400)}`); }
+  return json;
+}
+
+/* createPost: 채널별로 영상 URL + 캡션 발행 */
+async function postToBuffer({ token, channelIds, caption, videoUrl }) {
+  const mutation = `mutation CreatePost($input: CreatePostInput!) {
+    createPost(input: $input) {
+      __typename
+      ... on PostActionSuccess { post { id status } }
+      ... on PostActionError { message }
+    }
+  }`;
+  const results = [];
+  for (const channelId of channelIds) {
+    const input = {
+      channelId,
+      text: caption,
+      schedulingType: "automatic",
+      mode: MODE,
+      assets: [{ type: "video", url: videoUrl }],
+    };
+    const json = await gql(token, mutation, { input });
+    results.push({ channelId, json });
+    log(`  채널 ${channelId} 응답: ${JSON.stringify(json).slice(0, 500)}`);
+    if (json.errors) throw new Error("GraphQL 오류 — 위 응답으로 스키마 보정 필요");
+    const r = json.data?.createPost;
+    if (r?.__typename === "PostActionError") throw new Error("Buffer 거부: " + r.message);
+  }
+  return results;
 }
 
 async function main() {
   await loadEnv();
-
-  // 1) caption 최신화 (없거나 stale 이어도 항상 다시 렌더)
   await renderCaption();
 
-  // 2) 산출물 검증
-  if (!(await exists(VIDEO))) {
-    warn(`영상 없음: out/ticker.mp4 — 먼저 \`npm run capture\` (이 환경은 chromium 없어 CI/로컬에서).`);
-  } else {
-    const s = await stat(VIDEO);
-    log(`영상: out/ticker.mp4 (${fmtMB(s.size)})`);
-  }
-  const caption = (await exists(CAPTION)) ? await readFile(CAPTION, "utf8") : "";
+  if (await exists(VIDEO)) log(`영상(로컬): out/ticker.mp4 (${fmtMB((await stat(VIDEO)).size)})`);
+  const caption = (await exists(CAPTION)) ? (await readFile(CAPTION, "utf8")).trim() : "";
   log(`캡션: ${caption.split("\n")[0] || "(없음)"} …`);
 
   const token = process.env.BUFFER_ACCESS_TOKEN;
-  const profileIds = (process.env.BUFFER_PROFILE_IDS || "")
-    .split(",").map((s) => s.trim()).filter(Boolean);
+  const channelIds = (process.env.BUFFER_PROFILE_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const videoUrl = process.env.PUBLISH_VIDEO_URL;
 
-  // 3) dry-run vs 실 발행
   if (!CONFIRM) {
-    log("DRY-RUN (네트워크 호출 없음). 실제 발행: `node scripts/publish.mjs --confirm`");
-    log(`  → Buffer profiles: ${profileIds.length ? profileIds.join(", ") : "(BUFFER_PROFILE_IDS 미설정)"}`);
-    log(`  → 토큰: ${token ? "설정됨" : "미설정 (BUFFER_ACCESS_TOKEN)"}`);
+    log("DRY-RUN (네트워크 호출 없음). 실제 발행: --confirm");
+    log(`  토큰: ${token ? "설정됨" : "없음"} · 채널: ${channelIds.join(",") || "없음"} · mode: ${MODE}`);
+    log(`  영상 URL: ${videoUrl || "(PUBLISH_VIDEO_URL 미설정)"}`);
     return;
   }
-  if (!token || !profileIds.length) {
-    console.error("✗ --confirm 인데 BUFFER_ACCESS_TOKEN / BUFFER_PROFILE_IDS 가 없습니다.");
-    process.exit(1);
-  }
-  if (!(await exists(VIDEO))) {
-    console.error("✗ 발행할 out/ticker.mp4 가 없습니다."); process.exit(1);
-  }
-  log("발행 시도…");
-  const r = await postToBuffer({ token, profileIds, caption, videoPath: VIDEO });
-  log("✓ 발행 응답:", JSON.stringify(r).slice(0, 200));
+  if (!token || !channelIds.length) { console.error("✗ BUFFER_ACCESS_TOKEN / BUFFER_PROFILE_IDS 필요"); process.exit(1); }
+  if (!videoUrl) { console.error("✗ PUBLISH_VIDEO_URL(공개 mp4 URL) 필요"); process.exit(1); }
+
+  log(`발행 시도 (mode=${MODE}, ${channelIds.length}개 채널)…`);
+  const r = await postToBuffer({ token, channelIds, caption, videoUrl });
+  log("✓ 완료:", JSON.stringify(r).slice(0, 300));
 }
 
 main().catch((e) => { console.error("[publish] ✗", e.message); process.exit(1); });
