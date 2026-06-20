@@ -62,7 +62,6 @@ async function postToBuffer({ token, channelIds, caption, videoUrl }) {
     createPost(input: $input) {
       __typename
       ... on PostActionSuccess { post { id status } }
-      ... on PostActionError { message }
     }
   }`;
   const results = [];
@@ -79,7 +78,7 @@ async function postToBuffer({ token, channelIds, caption, videoUrl }) {
     log(`  채널 ${channelId} 응답: ${JSON.stringify(json).slice(0, 500)}`);
     if (json.errors) throw new Error("GraphQL 오류 — 위 응답으로 스키마 보정 필요");
     const r = json.data?.createPost;
-    if (r?.__typename === "PostActionError") throw new Error("Buffer 거부: " + r.message);
+    if (r && r.__typename !== "PostActionSuccess") throw new Error("Buffer 비성공 응답: " + JSON.stringify(r));
   }
   return results;
 }
