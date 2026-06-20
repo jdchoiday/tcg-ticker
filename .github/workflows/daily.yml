@@ -51,7 +51,6 @@ jobs:
         run: |
           ARGS=""
           if [ "${{ inputs.mock }}" = "true" ]; then ARGS="$ARGS --mock"; fi
-          if [ "${{ inputs.publish }}" = "true" ]; then ARGS="$ARGS --publish --confirm"; fi
           node scripts/pipeline.mjs $ARGS
 
       - name: upload mp4
@@ -76,3 +75,17 @@ jobs:
           git add -f samples/ticker-latest.mp4 samples/caption-latest.txt
           git commit -m "chore: daily ticker mp4 (auto)" || { echo "변경 없음"; exit 0; }
           git push origin HEAD:${{ github.ref_name }}
+
+      # Buffer 발행. 기본=초안(saveToDraft). repo 변수 PUBLISH_LIVE=1 이면 실게시.
+      # 위에서 커밋한 공개 raw URL 을 Buffer 가 가져간다.
+      - name: publish to Buffer
+        if: success()
+        env:
+          BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+          BUFFER_PROFILE_IDS: ${{ secrets.BUFFER_PROFILE_IDS }}
+          PUBLISH_VIDEO_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/samples/ticker-latest.mp4
+          BUFFER_MODE: addToQueue
+          BUFFER_SAVE_DRAFT: ${{ vars.PUBLISH_LIVE == '1' && '0' || '1' }}
+        run: |
+          if [ -z "$BUFFER_ACCESS_TOKEN" ]; then echo "Buffer 미설정 — 발행 건너뜀"; exit 0; fi
+          node scripts/publish.mjs --confirm
