@@ -173,30 +173,34 @@
   .col .rank .lbl{font-family:"Space Grotesk";font-weight:500;font-size:24px;color:var(--muted);}
 
   /* ---- CTA banner (레일과 푸터 사이 빈 공간 후킹/CTA) ---- */
-  #cta{position:absolute;left:0;right:0;top:1632px;z-index:3;text-align:center;
-       padding:0 64px;}
-  #cta .big{font-size:46px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
+  #cta{position:absolute;left:0;right:0;top:1616px;z-index:3;text-align:center;
+       padding:0 64px;display:flex;flex-direction:column;align-items:center;gap:22px;}
+  #cta .big{font-size:50px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
   #cta .big .accent{
     background:linear-gradient(135deg,var(--holo-a),var(--holo-b));
     -webkit-background-clip:text;background-clip:text;color:transparent;}
-  #cta .sub{margin-top:12px;font-size:28px;font-weight:600;color:var(--muted);}
-  #cta .sub b{color:var(--holo-a);}
-
-  /* ---- CTA banner (레일과 푸터 사이 빈 공간 후킹/CTA) ---- */
-  #cta{position:absolute;left:0;right:0;top:1632px;z-index:3;text-align:center;
-       padding:0 64px;}
-  #cta .big{font-size:46px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
-  #cta .big .accent{
+  /* follow = 글로우 핀(pill). 가장 눈에 띄는 행. */
+  #cta .sub{
+    display:inline-flex;align-items:center;gap:14px;
+    font-size:44px;font-weight:700;letter-spacing:-.01em;color:#06121A;
+    padding:20px 44px;border-radius:999px;
     background:linear-gradient(135deg,var(--holo-a),var(--holo-b));
-    -webkit-background-clip:text;background-clip:text;color:transparent;}
-  #cta .sub{margin-top:12px;font-size:28px;font-weight:600;color:var(--muted);}
-  #cta .sub b{color:var(--holo-a);}
+    box-shadow:0 0 0 0 rgba(110,231,240,.55),0 18px 40px rgba(110,231,240,.30);
+    animation:ctapulse 1.9s ease-in-out infinite;
+  }
+  #cta .sub b{color:#06121A;}
+  @keyframes ctapulse{
+    0%{box-shadow:0 0 0 0 rgba(110,231,240,.55),0 18px 40px rgba(110,231,240,.30);transform:scale(1);}
+    70%{box-shadow:0 0 0 26px rgba(110,231,240,0),0 18px 40px rgba(110,231,240,.30);transform:scale(1.035);}
+    100%{box-shadow:0 0 0 0 rgba(110,231,240,0),0 18px 40px rgba(110,231,240,.30);transform:scale(1);}
+  }
 
   /* ---- footer ---- */
   #foot{position:absolute;bottom:0;left:0;right:0;z-index:3;
         padding:0 64px 56px;display:flex;justify-content:space-between;align-items:flex-end;}
   #foot .fx{font-size:23px;color:var(--muted);font-family:"Space Mono",monospace;line-height:1.5;}
-  #foot .handle{font-size:30px;font-weight:700;color:var(--ink);}
+  #foot .handle{font-size:34px;font-weight:700;color:var(--holo-a);
+        text-shadow:0 0 18px rgba(110,231,240,.45);}
   #foot .tag{font-size:22px;color:var(--muted);font-weight:500;text-align:right;margin-top:6px;}
 
   @media (prefers-reduced-motion:reduce){
@@ -234,7 +238,7 @@
     <footer id="foot">
       <div class="fx" id="fxNote"></div>
       <div>
-        <div class="handle" id="handle">@your_handle</div>
+        <div class="handle" id="handle">@tcgvbm</div>
         <div class="tag" id="tagline">Daily graded-card price index</div>
       </div>
     </footer>
@@ -249,10 +253,10 @@ const CONFIG = {
   markText  : "VBM",            // 로고 자리 — 실제 로고 PNG로 교체 가능
   backWord  : "VBM",            // 뒷배경 흐릿한 워드마크
   subtitle  : "MOST EXPENSIVE GRADED POKÉMON CARDS",
-  handle    : "@VBMTCGKWZ",     // ← 채널 핸들
+  handle    : "@tcgvbm",        // ← 채널 핸들
   tagline   : "Daily graded-card price index",
   ctaLine1  : "💎 Today's Grails, Ranked 🔥",        // 빈 공간 후킹 카피
-  ctaLine2  : "🔔 Follow @VBMTCGKWZ 📈",
+  ctaLine2  : "🔔 Follow @tcgvbm",
   loopSeconds : 40,            // 스크롤 한 바퀴. 읽기 편한 속도(원본 60보다 약간 빠름).
   dataUrl   : "../data/cards.json", // Phase 0: 데이터/뷰 분리. 실패 시 DEMO_CARDS 폴백.
   fx : {                        // 환율 (추정) — 기준일 표기됨
