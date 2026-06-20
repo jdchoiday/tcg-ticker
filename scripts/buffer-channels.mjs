@@ -52,14 +52,12 @@ try {
 
   // ── 스키마 introspection (publish.mjs 입력 형식 확정용) ──
   const s = await gql(`query{
-    asset: __type(name:"AssetInput"){ inputFields{ name type{ name kind ofType{ name kind } } } }
-    mode:  __type(name:"ShareMode"){ enumValues{ name } }
-    post:  __type(name:"CreatePostInput"){ inputFields{ name type{ name kind ofType{ name kind } } } }
+    video: __type(name:"VideoAssetInput"){ inputFields{ name type{ name kind ofType{ name kind } } } }
+    sched: __type(name:"SchedulingType"){ enumValues{ name } }
   }`);
   console.log("\n=== SCHEMA ===");
-  console.log("AssetInput.inputFields:", JSON.stringify(s.asset?.inputFields));
-  console.log("ShareMode.enumValues:", JSON.stringify(s.mode?.enumValues));
-  console.log("CreatePostInput.inputFields:", JSON.stringify(s.post?.inputFields));
+  console.log("VideoAssetInput.inputFields:", JSON.stringify(s.video?.inputFields));
+  console.log("SchedulingType.enumValues:", JSON.stringify(s.sched?.enumValues));
 } catch (e) {
   console.error("✗", e.message);
   process.exit(1);
