@@ -182,6 +182,16 @@
   #cta .sub{margin-top:12px;font-size:28px;font-weight:600;color:var(--muted);}
   #cta .sub b{color:var(--holo-a);}
 
+  /* ---- CTA banner (레일과 푸터 사이 빈 공간 후킹/CTA) ---- */
+  #cta{position:absolute;left:0;right:0;top:1632px;z-index:3;text-align:center;
+       padding:0 64px;}
+  #cta .big{font-size:46px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
+  #cta .big .accent{
+    background:linear-gradient(135deg,var(--holo-a),var(--holo-b));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  #cta .sub{margin-top:12px;font-size:28px;font-weight:600;color:var(--muted);}
+  #cta .sub b{color:var(--holo-a);}
+
   /* ---- footer ---- */
   #foot{position:absolute;bottom:0;left:0;right:0;z-index:3;
         padding:0 64px 56px;display:flex;justify-content:space-between;align-items:flex-end;}
