@@ -56,14 +56,17 @@ function transcode(input, output, seconds) {
   const args = hasBgm
     ? [
         "-y", "-i", input,
-        "-stream_loop", "-1", "-i", BGM,            // 영상보다 짧으면 BGM 반복
+        "-i", BGM,   // BGM(60s) 이 영상(~42s)보다 길어 루프 불필요.
+        // ⚠ -stream_loop -1 금지: filter_complex+-shortest 와 조합 시 ffmpeg 가
+        //   가짜 "No space left on device"(exit 228)로 죽는 버그. 영상이 BGM보다 길어질 일 없게 유지.
         "-filter_complex",
           `[0:v]${vfilter}[v];` +
           `[1:a]volume=0.85,afade=t=in:st=0:d=1.5,afade=t=out:st=${fadeOut.toFixed(2)}:d=2.5[a]`,
         "-map", "[v]", "-map", "[a]",
         "-c:v", "libx264", "-preset", "medium", "-crf", "18",
         "-c:a", "aac", "-b:a", "192k",
-        "-shortest", "-movflags", "+faststart",     // 영상 끝나면 종료(오디오 잘림)
+        "-shortest",                                 // 영상 끝나면 종료(오디오 잘림)
+        // faststart 제거: moov 재배치 2-pass 가 러너에서 실패(exit 228) + Buffer/TikTok 재인코딩이라 불필요
         output,
       ]
     : [
