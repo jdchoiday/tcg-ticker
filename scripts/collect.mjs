@@ -156,9 +156,18 @@ async function main() {
     if (auth401) {
       console.error("✗ PPT 키가 거부됨(HTTP 401). PPT_API_KEY '값'이 잘못됐습니다.");
       console.error("  → pokemonpricetracker.com/api 의 실제 키를 공백 없이 GitHub Secret PPT_API_KEY 에 다시 저장하세요.");
-    } else {
-      console.error("✗ 수집된 카드가 0개입니다.");
+      process.exit(1);
     }
+    // 429(일일 한도)·네트워크 등 일시적 실패: 마지막 성공 data/cards.json 으로 폴백.
+    // → 하루치 영상이 통째로 빠지는 것을 막는다. (키 오류 401 은 위에서 하드 실패)
+    try {
+      const prev = JSON.parse(await readFile(resolve(ROOT, "data/cards.json"), "utf8"));
+      if (Array.isArray(prev) && prev.length) {
+        console.warn(`⚠ 수집 0개(HTTP 429 등 일시적). 기존 data/cards.json(${prev.length}장) 재사용해 계속 진행.`);
+        return;  // 기존 파일 유지, exit 0
+      }
+    } catch { /* 기존 파일 없음/손상 → 아래에서 하드 실패 */ }
+    console.error("✗ 수집된 카드가 0개이고 재사용할 data/cards.json 도 없습니다.");
     process.exit(1);
   }
 
