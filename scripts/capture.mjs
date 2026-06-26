@@ -14,6 +14,7 @@
  * Requires: playwright (npm i), chromium (npx playwright install chromium), ffmpeg on PATH.
  */
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, rm, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve, join } from "node:path";
@@ -43,15 +44,36 @@ function startServer() {
   });
 }
 
-/* ---- 3b. ffmpeg transcode ---- */
-function transcode(input, output) {
-  const args = [
-    "-y", "-i", input,
-    "-vf", `scale=${VIDEO_W}:${VIDEO_H}:flags=lanczos,fps=${FPS},format=yuv420p`,
-    "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-    "-movflags", "+faststart",
-    output,
-  ];
+/* ---- 3b. ffmpeg transcode (+ optional baked-in BGM) ----
+ * assets/bgm.mp3 가 있으면 영상 길이에 맞춰 루프·페이드 후 믹스한다.
+ * TikTok 자동발행(Buffer)은 틱톡 인기음원을 못 붙이므로, 음악은 파일에 미리 입혀야 한다.
+ * 음원은 직접 합성한 로열티프리 트랙(scripts/make-bgm.sh 로 재생성 가능) → 저작권 자유. */
+const BGM = join(ROOT, "assets", "bgm.mp3");
+function transcode(input, output, seconds) {
+  const hasBgm = existsSync(BGM) && process.env.NO_BGM !== "1";
+  const vfilter = `scale=${VIDEO_W}:${VIDEO_H}:flags=lanczos,fps=${FPS},format=yuv420p`;
+  const fadeOut = Math.max(0, (Number(seconds) || 0) - 2.5);
+  const args = hasBgm
+    ? [
+        "-y", "-i", input,
+        "-stream_loop", "-1", "-i", BGM,            // 영상보다 짧으면 BGM 반복
+        "-filter_complex",
+          `[0:v]${vfilter}[v];` +
+          `[1:a]volume=0.85,afade=t=in:st=0:d=1.5,afade=t=out:st=${fadeOut.toFixed(2)}:d=2.5[a]`,
+        "-map", "[v]", "-map", "[a]",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-c:a", "aac", "-b:a", "192k",
+        "-shortest", "-movflags", "+faststart",     // 영상 끝나면 종료(오디오 잘림)
+        output,
+      ]
+    : [
+        "-y", "-i", input,
+        "-vf", vfilter,
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-movflags", "+faststart",
+        output,
+      ];
+  log(hasBgm ? "transcode + BGM mix (assets/bgm.mp3)" : "transcode (no BGM)");
   return new Promise((res, rej) => {
     const ff = spawn("ffmpeg", args, { stdio: ["ignore", "ignore", "inherit"] });
     ff.on("error", (e) => rej(new Error("ffmpeg not found on PATH? " + e.message)));
@@ -102,7 +124,7 @@ try {
   const webm = (await readdir(OUT)).filter((f) => f.endsWith(".webm")).map((f) => join(OUT, f))[0];
   if (!webm) throw new Error("no .webm produced by Playwright");
   log("transcoding → out/ticker.mp4 …");
-  await transcode(webm, join(OUT, "ticker.mp4"));
+  await transcode(webm, join(OUT, "ticker.mp4"), seconds);
   await rm(webm).catch(() => {});
   log("✓ done → out/ticker.mp4");
 } catch (e) {
