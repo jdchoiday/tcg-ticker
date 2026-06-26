@@ -74,7 +74,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f samples/ticker-latest.mp4 samples/caption-latest.txt
           git commit -m "chore: daily ticker mp4 (auto)" || { echo "변경 없음"; exit 0; }
-          git push origin HEAD:${{ github.ref_name }}
+          # push 전 최신 main 을 rebase + 재시도(재실행/동시성 충돌 방지)
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin ${{ github.ref_name }} \
+              && git push origin HEAD:${{ github.ref_name }} && exit 0
+            echo "push 충돌 — 재시도 $i…"; sleep 3
+          done
+          echo "::error::git push 3회 실패"; exit 1
 
       # Buffer 발행. 기본=초안(saveToDraft). repo 변수 PUBLISH_LIVE=1 이면 실게시.
       # 위에서 커밋한 공개 raw URL 을 Buffer 가 가져간다.
