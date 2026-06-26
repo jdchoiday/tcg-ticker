@@ -29,6 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 러너 디스크 확보(faststart 2-pass 저장 시 'No space left' 방지) — 미사용 대형 툴체인 제거
+      - name: free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL /usr/local/.ghcup \
+                      /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          df -h /
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
