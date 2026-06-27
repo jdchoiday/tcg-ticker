@@ -147,7 +147,12 @@ async function main() {
       type: it.type, lang: it.lang, grade: it.grade,
       ...(it.pop ? { pop: it.pop } : {}),
       krw,
-      img: CARD_IMAGES ? (it.img || card.imageCdnUrl400 || card.imageCdnUrl || null) : null,
+      // 이미지 우선순위: 권리정리 수동 img > API 이미지 > tcgPlayerId 로 직접 생성한 CDN URL.
+      // (API가 이미지 필드를 누락해도 매칭된 상품 id 로 항상 이미지 확보 → 빈 카드 방지)
+      img: CARD_IMAGES
+        ? (it.img || card.imageCdnUrl400 || card.imageCdnUrl ||
+           (pid != null ? `https://tcgplayer-cdn.tcgplayer.com/product/${pid}_in_400x400` : null))
+        : null,
       _usd: got.usd, _src: got.source,
     });
   }
@@ -177,6 +182,7 @@ async function main() {
 
   await writeFile(resolve(ROOT, "data/cards.json"), JSON.stringify(out, null, 2) + "\n", "utf8");
   log(`✓ ${out.length}장 → data/cards.json (1위 ${out[0].nameKo} $${rows[0]._usd})`);
+  if (CARD_IMAGES) log(`  카드 이미지: ${out.filter((c) => c.img).length}/${out.length}`);
   if (!MOCK && LAST_REMAINING != null) log(`  남은 크레딧(일일): ${LAST_REMAINING}`);
   log("  다음: npm run validate && npm run capture");
 }

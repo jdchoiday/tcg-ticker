@@ -57,7 +57,7 @@ async function gql(token, query, variables) {
 }
 
 /* createPost: 채널별로 영상 URL + 캡션 발행 */
-async function postToBuffer({ token, channelIds, caption, videoUrl }) {
+async function postToBuffer({ token, channelIds, caption, videoUrl, saveDraft }) {
   const mutation = `mutation CreatePost($input: CreatePostInput!) {
     createPost(input: $input) {
       __typename
@@ -72,7 +72,7 @@ async function postToBuffer({ token, channelIds, caption, videoUrl }) {
       schedulingType: "automatic",
       mode: MODE,                                   // ShareMode: addToQueue|shareNow|shareNext|customScheduled
       assets: [{ video: { url: videoUrl } }],       // VideoAssetInput { url(필수), thumbnailUrl?, metadata? }
-      ...(process.env.BUFFER_SAVE_DRAFT === "1" ? { saveToDraft: true } : {}), // 안전 테스트=초안
+      ...(saveDraft ? { saveToDraft: true } : {}), // 초안 모드(테스트 또는 품질 가드)
     };
     const json = await gql(token, mutation, { input });
     results.push({ channelId, json });
@@ -92,6 +92,19 @@ async function main() {
   const caption = (await exists(CAPTION)) ? (await readFile(CAPTION, "utf8")).trim() : "";
   log(`캡션: ${caption.split("\n")[0] || "(없음)"} …`);
 
+  // 품질 가드: 카드 이미지 커버리지가 낮으면(빈 카드 많은 영상) 라이브 자동게시 대신 '초안'으로.
+  let saveDraft = process.env.BUFFER_SAVE_DRAFT === "1";
+  try {
+    const cards = JSON.parse(await readFile(resolve(ROOT, "data/cards.json"), "utf8"));
+    const withImg = cards.filter((c) => c.img).length;
+    const cov = cards.length ? withImg / cards.length : 0;
+    log(`이미지 커버리지: ${withImg}/${cards.length} (${Math.round(cov * 100)}%)`);
+    if (!saveDraft && cov < 0.8) {
+      saveDraft = true;
+      console.warn(`⚠ 이미지 커버리지 ${Math.round(cov * 100)}% < 80% — 빈 카드 많은 영상이라 라이브 대신 '초안'으로 전환(검수 필요).`);
+    }
+  } catch { /* cards.json 없으면 가드 생략 */ }
+
   const token = process.env.BUFFER_ACCESS_TOKEN;
   const channelIds = (process.env.BUFFER_PROFILE_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
   const videoUrl = process.env.PUBLISH_VIDEO_URL;
@@ -105,8 +118,8 @@ async function main() {
   if (!token || !channelIds.length) { console.error("✗ BUFFER_ACCESS_TOKEN / BUFFER_PROFILE_IDS 필요"); process.exit(1); }
   if (!videoUrl) { console.error("✗ PUBLISH_VIDEO_URL(공개 mp4 URL) 필요"); process.exit(1); }
 
-  log(`발행 시도 (mode=${MODE}, ${channelIds.length}개 채널)…`);
-  const r = await postToBuffer({ token, channelIds, caption, videoUrl });
+  log(`발행 시도 (mode=${MODE}, ${channelIds.length}개 채널, ${saveDraft ? "초안" : "라이브"})…`);
+  const r = await postToBuffer({ token, channelIds, caption, videoUrl, saveDraft });
   log("✓ 완료:", JSON.stringify(r).slice(0, 300));
 }
 
