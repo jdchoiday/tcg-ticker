@@ -56,7 +56,7 @@
     "type": "dark",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 6750000,
+    "krw": 6718965,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/246723_in_400x400.jpg"
   },
   {
@@ -68,7 +68,7 @@
     "type": "dragon",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 4844985,
+    "krw": 4943550,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/284137_in_400x400.jpg"
   },
   {
@@ -80,7 +80,7 @@
     "type": "dragon",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 4330500,
+    "krw": 4412085,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/246733_in_400x400.jpg"
   },
   {
@@ -116,7 +116,7 @@
     "type": "psychic",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 2399985,
+    "krw": 2400000,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/451834_in_400x400.jpg"
   },
   {
@@ -145,18 +145,6 @@
   },
   {
     "rank": 13,
-    "nameKo": "Leafeon VMAX",
-    "nameEn": "Alt Art",
-    "set": "Evolving Skies 205/203",
-    "rarity": "SAR",
-    "type": "grass",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 943500,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/246696_in_400x400.jpg"
-  },
-  {
-    "rank": 14,
     "nameKo": "Glaceon VMAX",
     "nameEn": "Alt Art",
     "set": "Evolving Skies 209/203",
@@ -166,6 +154,18 @@
     "grade": "PSA 10",
     "krw": 900465,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/246756_in_400x400.jpg"
+  },
+  {
+    "rank": 14,
+    "nameKo": "Leafeon VMAX",
+    "nameEn": "Alt Art",
+    "set": "Evolving Skies 205/203",
+    "rarity": "SAR",
+    "type": "grass",
+    "lang": "EN",
+    "grade": "PSA 10",
+    "krw": 867000,
+    "img": "https://tcgplayer-cdn.tcgplayer.com/product/246696_in_400x400.jpg"
   },
   {
     "rank": 15,
@@ -212,7 +212,7 @@
     "type": "grass",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 231540,
+    "krw": 234630,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/42355_in_400x400.jpg"
   }
 ]
