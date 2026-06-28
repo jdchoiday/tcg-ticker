@@ -257,7 +257,8 @@ const CONFIG = {
   tagline   : "Daily graded-card price index",
   ctaLine1  : "💎 Today's Grails, Ranked 🔥",        // 빈 공간 후킹 카피
   ctaLine2  : "🔔 Follow @tcgvbm",
-  loopSeconds : 40,            // 스크롤 한 바퀴. 읽기 편한 속도(원본 60보다 약간 빠름).
+  motion    : "step",          // "step"=한 장씩 카루셀(기본) | "scroll"=연속 가로 스크롤
+  loopSeconds : 40,            // 전체 한 바퀴(=카드수×장당 노출). 18장이면 장당 ~2.2s.
   dataUrl   : "../data/cards.json", // Phase 0: 데이터/뷰 분리. 실패 시 DEMO_CARDS 폴백.
   fx : {                        // 환율 (추정) — 기준일 표기됨
     date     : "2026-06-16",
@@ -365,10 +366,30 @@ function render(cards){
     `FX ${CONFIG.fx.date} · 1 USD = ₩${CONFIG.fx.krwPerUsd.toLocaleString()} = ₫${CONFIG.fx.vndPerUsd.toLocaleString()}<br>` +
     `<span style="opacity:.7">prices = estimate / demo data</span>`;
 
-  const html = cards.map(cardHTML).join("");
   const track = document.getElementById("track");
-  track.innerHTML = html + html;            // 무한 루프용 2회 복제
-  track.style.setProperty("--dur", CONFIG.loopSeconds+"s");
+  if (CONFIG.motion === "step") {
+    // 한 장씩(카드 폭=화면 폭) 가운데 크게 보여주고 다음 카드로 넘어가는 스텝 카루셀
+    const W = 1080, n = cards.length, hold = 0.80; // hold=슬롯 중 정지 비율
+    track.innerHTML = cards.map(cardHTML).join("") + cardHTML(cards[0]); // 마지막→첫장 seamless wrap
+    let kf = "";
+    for (let i = 0; i < n; i++) {
+      const s = (i / n) * 100, h = ((i + hold) / n) * 100;
+      kf += `${s.toFixed(3)}%{transform:translateX(${-i * W}px)}`;
+      kf += `${h.toFixed(3)}%{transform:translateX(${-i * W}px);animation-timing-function:cubic-bezier(.6,0,.3,1)}`;
+    }
+    kf += `100%{transform:translateX(${-n * W}px)}`;
+    const st = document.createElement("style");
+    st.textContent =
+      `#track{gap:0!important;padding:0!important;animation:stepmove ${CONFIG.loopSeconds}s infinite!important}` +
+      `.col{width:${W}px!important;justify-content:center}` +
+      `.card{width:560px;height:784px}.info{width:560px}` +
+      `@keyframes stepmove{${kf}}`;
+    document.head.appendChild(st);
+  } else {
+    const html = cards.map(cardHTML).join("");
+    track.innerHTML = html + html;            // 무한 루프용 2회 복제
+    track.style.setProperty("--dur", CONFIG.loopSeconds + "s");
+  }
 
   // capture.mjs 가 "렌더 완료"를 감지할 신호
   window.__ticableReady = true;

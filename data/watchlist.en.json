@@ -1,0 +1,28 @@
+{
+  "_note": "추적 카드 목록. collect.mjs 가 tcgPlayerId 있으면 그걸로 단건 조회(정확·결과없음 0), 없으면 query 로 검색(sortBy=price desc, 최상위 1건). 표시필드(nameKo=헤드라인/nameEn=서브라인 등)는 그대로 cards.json 으로.",
+  "_warning": "[2026-06-19] 쿼리 단순화(희귀도/에디션 단어 제거 → '결과 없음' 최소화). 알려진 2장은 tcgPlayerId 고정. 나머지는 다음 실응답 진단에서 id 받아 고정 예정.",
+  "_images_note": "cardImages:true = API imageCdnUrl(TCGPlayer 카드사진) 사용. ⚠️ IP/ToS 본인 책임. 카드별 img 넣으면 우선.",
+  "_credits_note": "카드당 2크레딧(기본1+eBay1). 18장=36크레딧. 무료 100/day → 하루 1회 권장. 결과없음도 과금되니 쿼리 정확도가 비용.",
+  "cardImages": true,
+  "topN": 18,
+  "cards": [
+    {"query": "Charizard Base Set",          "tcgPlayerId": "106999", "nameKo": "Charizard",     "nameEn": "Base Set Holo",   "set": "Base Set 4/102",          "rarity": "Holo",      "type": "fire",    "lang": "EN", "grade": "PSA 10"},
+    {"query": "Charizard VMAX Champions Path","tcgPlayerId": "223073", "nameKo": "Charizard VMAX","nameEn": "Rainbow Rare",    "set": "Champion's Path 074/073", "rarity": "HR",        "type": "fire",    "lang": "EN", "grade": "PSA 10"},
+    {"query": "Charizard Dragon Frontiers",   "nameKo": "Charizard ★",   "nameEn": "Gold Star",       "set": "Dragon Frontiers 100/101", "rarity": "Gold Star", "type": "fire",    "lang": "EN", "grade": "PSA 10"},
+    {"query": "Rayquaza EX Deoxys",           "nameKo": "Rayquaza ★",    "nameEn": "Gold Star",       "set": "EX Deoxys 107/107",        "rarity": "Gold Star", "type": "dragon",  "lang": "EN", "grade": "PSA 10"},
+    {"query": "Umbreon POP Series 5",         "nameKo": "Umbreon ★",     "nameEn": "Gold Star",       "set": "POP Series 5 17/17",       "rarity": "Gold Star", "type": "dark",    "lang": "EN", "grade": "PSA 10"},
+    {"query": "Espeon POP Series 5",          "nameKo": "Espeon ★",      "nameEn": "Gold Star",       "set": "POP Series 5 16/17",       "rarity": "Gold Star", "type": "psychic", "lang": "EN", "grade": "PSA 10"},
+    {"query": "Venusaur Base Set",            "nameKo": "Venusaur",      "nameEn": "1st Edition Holo", "set": "Base Set 15/102",          "rarity": "Holo",      "type": "grass",   "lang": "EN", "grade": "PSA 10"},
+    {"query": "Blastoise Base Set",           "nameKo": "Blastoise",     "nameEn": "1st Edition Holo", "set": "Base Set 2/102",           "rarity": "Holo",      "type": "water",   "lang": "EN", "grade": "PSA 10"},
+    {"query": "Mewtwo Base Set",              "nameKo": "Mewtwo",        "nameEn": "1st Edition Holo", "set": "Base Set 10/102",          "rarity": "Holo",      "type": "psychic", "lang": "EN", "grade": "PSA 10"},
+    {"query": "Gyarados Base Set",            "nameKo": "Gyarados",      "nameEn": "1st Edition Holo", "set": "Base Set 6/102",           "rarity": "Holo",      "type": "water",   "lang": "EN", "grade": "PSA 10"},
+    {"query": "Umbreon VMAX Evolving Skies",  "nameKo": "Umbreon VMAX",  "nameEn": "Alt Art (Moonbreon)", "set": "Evolving Skies 215/203", "rarity": "SAR",     "type": "dark",    "lang": "EN", "grade": "PSA 10"},
+    {"query": "Rayquaza VMAX Evolving Skies", "nameKo": "Rayquaza VMAX", "nameEn": "Alt Art",         "set": "Evolving Skies 218/203",   "rarity": "SAR",       "type": "dragon",  "lang": "EN", "grade": "PSA 10"},
+    {"query": "Giratina V Lost Origin",       "nameKo": "Giratina V",    "nameEn": "Alt Art",         "set": "Lost Origin 186/196",      "rarity": "SAR",       "type": "dragon",  "lang": "EN", "grade": "PSA 10"},
+    {"query": "Mew VMAX Fusion Strike",       "nameKo": "Mew VMAX",      "nameEn": "Alt Art",         "set": "Fusion Strike 268/264",    "rarity": "SAR",       "type": "psychic", "lang": "EN", "grade": "PSA 10"},
+    {"query": "Lugia V Silver Tempest",       "nameKo": "Lugia V",       "nameEn": "Alt Art",         "set": "Silver Tempest 186/195",   "rarity": "SAR",       "type": "psychic", "lang": "EN", "grade": "PSA 10"},
+    {"query": "Glaceon VMAX Evolving Skies",  "nameKo": "Glaceon VMAX",  "nameEn": "Alt Art",         "set": "Evolving Skies 209/203",   "rarity": "SAR",       "type": "water",   "lang": "EN", "grade": "PSA 10"},
+    {"query": "Leafeon VMAX Evolving Skies",  "nameKo": "Leafeon VMAX",  "nameEn": "Alt Art",         "set": "Evolving Skies 205/203",   "rarity": "SAR",       "type": "grass",   "lang": "EN", "grade": "PSA 10"},
+    {"query": "Charizard Obsidian Flames",    "nameKo": "Charizard ex",  "nameEn": "Special Illustration Rare", "set": "Obsidian Flames 223/197", "rarity": "SIR", "type": "fire",    "lang": "EN", "grade": "PSA 10"}
+  ]
+}

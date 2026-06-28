@@ -1,0 +1,188 @@
+{
+  "_note": "일본판(JP) 워치리스트. collect.mjs 가 language=japanese 로 조회. 쿼리는 영어(PPT 검색 인덱스). 정확도 위해 실응답에서 tcgPlayerId 받아 고정 권장.",
+  "_warning": "검색 기반 18장 → 첫 실데이터(Run workflow) 로 시세/이미지 커버리지 확인 필요.",
+  "cardImages": true,
+  "topN": 18,
+  "cards": [
+    {
+      "query": "Umbreon VMAX Eevee Heroes",
+      "nameKo": "ブラッキーVMAX",
+      "nameEn": "Umbreon VMAX SA",
+      "set": "イーブイヒーローズ 095/069",
+      "rarity": "SA",
+      "type": "dark",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Charizard ex Shiny Treasure",
+      "nameKo": "リザードンex",
+      "nameEn": "Charizard ex SAR",
+      "set": "シャイニートレジャーex 333/190",
+      "rarity": "SAR",
+      "type": "fire",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Rayquaza VMAX Climax",
+      "nameKo": "レックウザVMAX",
+      "nameEn": "Rayquaza VMAX SSR",
+      "set": "VMAXクライマックス 086/184",
+      "rarity": "SSR",
+      "type": "dragon",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Sylveon VMAX Eevee Heroes",
+      "nameKo": "ニンフィアVMAX",
+      "nameEn": "Sylveon VMAX SA",
+      "set": "イーブイヒーローズ 093/069",
+      "rarity": "SA",
+      "type": "fairy",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Glaceon VMAX Eevee Heroes",
+      "nameKo": "グレイシアVMAX",
+      "nameEn": "Glaceon VMAX SA",
+      "set": "イーブイヒーローズ 092/069",
+      "rarity": "SA",
+      "type": "water",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Leafeon VMAX Eevee Heroes",
+      "nameKo": "リーフィアVMAX",
+      "nameEn": "Leafeon VMAX SA",
+      "set": "イーブイヒーローズ 091/069",
+      "rarity": "SA",
+      "type": "grass",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Espeon VMAX Eevee Heroes",
+      "nameKo": "エーフィVMAX",
+      "nameEn": "Espeon VMAX SA",
+      "set": "イーブイヒーローズ 094/069",
+      "rarity": "SA",
+      "type": "psychic",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Vaporeon VMAX Eevee Heroes",
+      "nameKo": "シャワーズVMAX",
+      "nameEn": "Vaporeon VMAX SA",
+      "set": "イーブイヒーローズ 090/069",
+      "rarity": "SA",
+      "type": "water",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Flareon VMAX Eevee Heroes",
+      "nameKo": "ブースターVMAX",
+      "nameEn": "Flareon VMAX SA",
+      "set": "イーブイヒーローズ 096/069",
+      "rarity": "SA",
+      "type": "fire",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Jolteon VMAX Eevee Heroes",
+      "nameKo": "サンダースVMAX",
+      "nameEn": "Jolteon VMAX SA",
+      "set": "イーブイヒーローズ 089/069",
+      "rarity": "SA",
+      "type": "electric",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Lugia V Paradigm Trigger",
+      "nameKo": "ルギアV",
+      "nameEn": "Lugia V SA",
+      "set": "パラダイムトリガー 139/098",
+      "rarity": "SA",
+      "type": "normal",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Giratina V Lost Abyss",
+      "nameKo": "ギラティナV",
+      "nameEn": "Giratina V SA",
+      "set": "ロストアビス 110/100",
+      "rarity": "SA",
+      "type": "dragon",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Mew VMAX Fusion Arts",
+      "nameKo": "ミュウVMAX",
+      "nameEn": "Mew VMAX SA",
+      "set": "フュージョンアーツ 218/172",
+      "rarity": "SA",
+      "type": "psychic",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Charizard V Shiny Star V",
+      "nameKo": "リザードンV",
+      "nameEn": "Charizard V SSR",
+      "set": "シャイニースターV 307/190",
+      "rarity": "SSR",
+      "type": "fire",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Mewtwo V Star Birth",
+      "nameKo": "ミュウツーV",
+      "nameEn": "Mewtwo V SA",
+      "set": "スターバース 086/172",
+      "rarity": "SA",
+      "type": "psychic",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Iono Clay Burst",
+      "nameKo": "ナンジャモ",
+      "nameEn": "Iono SAR",
+      "set": "クレイバースト 080/071",
+      "rarity": "SAR",
+      "type": "electric",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Miraidon ex Violet",
+      "nameKo": "ミライドンex",
+      "nameEn": "Miraidon ex SAR",
+      "set": "バイオレットex 086/078",
+      "rarity": "SAR",
+      "type": "electric",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Pikachu Promo",
+      "nameKo": "ピカチュウ",
+      "nameEn": "Pikachu Promo",
+      "set": "プロモ 208/S-P",
+      "rarity": "Promo",
+      "type": "electric",
+      "lang": "JP",
+      "grade": "PSA 10"
+    }
+  ]
+}
