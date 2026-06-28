@@ -107,7 +107,17 @@ try {
   await page.goto(URL, { waitUntil: "networkidle" });
   await page.waitForSelector('html[data-ready="1"]', { timeout: 15000 });
   await page.evaluate(() => document.fonts.ready);
-  await sleep(500); // 폰트/이미지/레이아웃 안정화
+  // 카드 배경이미지(.photo background-image) 전부 로드 대기 → 첫 프레임 빈 카드 방지
+  await page.evaluate(async () => {
+    const urls = [...document.querySelectorAll(".card .photo")]
+      .map((el) => (getComputedStyle(el).backgroundImage.match(/url\("?(.+?)"?\)/) || [])[1])
+      .filter(Boolean);
+    await Promise.all(urls.map((u) => new Promise((res) => {
+      const im = new Image(); im.onload = im.onerror = res; im.src = u;
+      setTimeout(res, 8000); // CDN 지연 상한
+    })));
+  }).catch(() => {});
+  await sleep(500); // 폰트/레이아웃 안정화
 
   const loopSeconds = await page.evaluate(() => (window.CONFIG?.loopSeconds) ?? 60);
   const seconds = Number(process.env.CAPTURE_SECONDS) || loopSeconds; // 기본=한 바퀴(이음새 0)
