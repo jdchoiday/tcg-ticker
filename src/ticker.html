@@ -332,7 +332,6 @@ function cardHTML(c){
          ${c.pop?`<span class="pop">${c.pop}</span>`:""}
        </div>
        <div class="price-usd">${fmtUsd(usd)}</div>
-       <div class="price-vnd">${fmtVnd(vnd)}</div>
      </div>
      <div class="rank"><span class="hash">#${c.rank}</span><span class="lbl">RANK</span></div>
    </div>`;
@@ -363,8 +362,8 @@ function render(cards){
   document.getElementById("ctaLine1").textContent   = CONFIG.ctaLine1;
   document.getElementById("ctaLine2").textContent   = CONFIG.ctaLine2;
   document.getElementById("fxNote").innerHTML =
-    `FX ${CONFIG.fx.date} · 1 USD = ₩${CONFIG.fx.krwPerUsd.toLocaleString()} = ₫${CONFIG.fx.vndPerUsd.toLocaleString()}<br>` +
-    `<span style="opacity:.7">prices = estimate / demo data</span>`;
+    `PSA 10 market · prices in USD<br>` +
+    `<span style="opacity:.7">source: eBay sales · estimate</span>`;
 
   const track = document.getElementById("track");
   if (CONFIG.motion === "step") {
