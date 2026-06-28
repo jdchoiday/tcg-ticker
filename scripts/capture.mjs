@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 /**
- * capture.mjs — Phase 2: render ticker.html headlessly and record one loop to mp4.
+ * capture.mjs — Phase 2: render ticker.html → out/ticker.mp4 (매끄러운 모션).
  *
- *   1. spawns serve.mjs on a private port
- *   2. opens it in headless Chromium (Playwright) at 1080x1920, recording video
- *   3. waits for fonts + data-ready, records exactly CONFIG.loopSeconds (one seamless loop)
- *   4. transcodes the .webm → out/ticker.mp4 (H.264, 1080x1920, 30fps) via ffmpeg
+ * 결정론적 프레임 캡처(deterministic frame capture):
+ *   1. serve.mjs 를 자식 프로세스로 띄움
+ *   2. headless Chromium(Playwright) 1080x1920 로 로드, 폰트/데이터 준비 대기
+ *   3. 모든 CSS 애니메이션을 pause 하고, 프레임마다 currentTime 을 정확히 seek → 스크린샷
+ *      (recordVideo 화면녹화의 불균일 fps/저더를 제거 → 완벽히 균일한 모션)
+ *   4. ffmpeg 로 PNG 시퀀스를 정확한 CFR fps 로 인코딩(+ assets/bgm.mp3 믹스)
  *
- * Usage:
- *   node scripts/capture.mjs                 # full loop (CONFIG.loopSeconds)
- *   CAPTURE_SECONDS=6 node scripts/capture.mjs   # short test clip
+ * 환경변수:
+ *   FPS=30|60            출력/캡처 프레임레이트(기본 30, 60=초매끄러움·프레임수 2배)
+ *   CAPTURE_SECONDS=8    짧은 테스트 클립(기본=한 바퀴=CONFIG.loopSeconds)
+ *   NO_BGM=1             BGM 끄기
  *
- * Requires: playwright (npm i), chromium (npx playwright install chromium), ffmpeg on PATH.
+ * Requires: playwright, chromium, ffmpeg.
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -23,9 +26,12 @@ import { setTimeout as sleep } from "node:timers/promises";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const OUT = join(ROOT, "out");
+const FRAMES = join(OUT, "frames");
+const BGM = join(ROOT, "assets", "bgm.mp3");
 const PORT = Number(process.env.CAPTURE_PORT) || 4188;
 const URL = `http://localhost:${PORT}/`;
-const VIDEO_W = 1080, VIDEO_H = 1920, FPS = 30;
+const VIDEO_W = 1080, VIDEO_H = 1920;
+const FPS = Math.max(24, Math.min(60, Number(process.env.FPS) || 30));
 
 const log = (...a) => console.log("[capture]", ...a);
 
@@ -44,39 +50,33 @@ function startServer() {
   });
 }
 
-/* ---- 3b. ffmpeg transcode (+ optional baked-in BGM) ----
- * assets/bgm.mp3 가 있으면 영상 길이에 맞춰 루프·페이드 후 믹스한다.
- * TikTok 자동발행(Buffer)은 틱톡 인기음원을 못 붙이므로, 음악은 파일에 미리 입혀야 한다.
- * 음원은 직접 합성한 로열티프리 트랙(scripts/make-bgm.sh 로 재생성 가능) → 저작권 자유. */
-const BGM = join(ROOT, "assets", "bgm.mp3");
-function transcode(input, output, seconds) {
+/* ---- 4. ffmpeg: PNG 시퀀스 → mp4 (+BGM) ----
+ * 프레임이 이미 1080x1920 정확본이라 scale 불필요. -r 로 정확한 CFR 보장(저더 0). */
+function encodeFrames(output, seconds) {
   const hasBgm = existsSync(BGM) && process.env.NO_BGM !== "1";
-  const vfilter = `scale=${VIDEO_W}:${VIDEO_H}:flags=lanczos,fps=${FPS},format=yuv420p`;
+  const pattern = join(FRAMES, "f%05d.png");
   const fadeOut = Math.max(0, (Number(seconds) || 0) - 2.5);
   const args = hasBgm
     ? [
-        "-y", "-i", input,
-        "-i", BGM,   // BGM(60s) 이 영상(~42s)보다 길어 루프 불필요.
-        // ⚠ -stream_loop -1 금지: filter_complex+-shortest 와 조합 시 ffmpeg 가
-        //   가짜 "No space left on device"(exit 228)로 죽는 버그. 영상이 BGM보다 길어질 일 없게 유지.
+        "-y", "-framerate", String(FPS), "-i", pattern,
+        "-i", BGM,
         "-filter_complex",
-          `[0:v]${vfilter}[v];` +
-          `[1:a]volume=0.85,afade=t=in:st=0:d=1.5,afade=t=out:st=${fadeOut.toFixed(2)}:d=2.5[a]`,
+          `[0:v]format=yuv420p[v];` +
+          `[1:a]volume=0.9,afade=t=in:st=0:d=1.5,afade=t=out:st=${fadeOut.toFixed(2)}:d=2.5[a]`,
         "-map", "[v]", "-map", "[a]",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-r", String(FPS),
         "-c:a", "aac", "-b:a", "192k",
-        "-shortest",                                 // 영상 끝나면 종료(오디오 잘림)
-        // faststart 제거: moov 재배치 2-pass 가 러너에서 실패(exit 228) + Buffer/TikTok 재인코딩이라 불필요
+        "-shortest", "-movflags", "+faststart",
         output,
       ]
     : [
-        "-y", "-i", input,
-        "-vf", vfilter,
-        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+        "-y", "-framerate", String(FPS), "-i", pattern,
+        "-vf", "format=yuv420p",
+        "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-r", String(FPS),
         "-movflags", "+faststart",
         output,
       ];
-  log(hasBgm ? "transcode + BGM mix (assets/bgm.mp3)" : "transcode (no BGM)");
+  log(`encode ${FPS}fps ${hasBgm ? "+ BGM" : "(no BGM)"} …`);
   return new Promise((res, rej) => {
     const ff = spawn("ffmpeg", args, { stdio: ["ignore", "ignore", "inherit"] });
     ff.on("error", (e) => rej(new Error("ffmpeg not found on PATH? " + e.message)));
@@ -87,10 +87,8 @@ function transcode(input, output, seconds) {
 let server;
 try {
   await mkdir(OUT, { recursive: true });
-  // clean prior webm fragments (keep mp4 + .gitkeep)
-  for (const f of await readdir(OUT)) {
-    if (f.endsWith(".webm")) await rm(join(OUT, f));
-  }
+  await rm(FRAMES, { recursive: true, force: true });
+  await mkdir(FRAMES, { recursive: true });
 
   log("starting server…");
   server = await startServer();
@@ -102,7 +100,6 @@ try {
     viewport: { width: VIDEO_W, height: VIDEO_H },
     deviceScaleFactor: 1,
     reducedMotion: "no-preference",
-    recordVideo: { dir: OUT, size: { width: VIDEO_W, height: VIDEO_H } },
   });
   const page = await context.newPage();
 
@@ -110,25 +107,33 @@ try {
   await page.goto(URL, { waitUntil: "networkidle" });
   await page.waitForSelector('html[data-ready="1"]', { timeout: 15000 });
   await page.evaluate(() => document.fonts.ready);
-  await sleep(400); // settle fonts/layout before the clean loop
+  await sleep(500); // 폰트/이미지/레이아웃 안정화
 
   const loopSeconds = await page.evaluate(() => (window.CONFIG?.loopSeconds) ?? 60);
-  // 빠른 스크롤(작은 loopSeconds)이면 한 루프가 너무 짧으니 정수배로 ~18s 이상 녹화(이음새 유지)
-  const loops = Math.max(1, Math.round(18 / loopSeconds));
-  const seconds = Number(process.env.CAPTURE_SECONDS) || loops * loopSeconds;
-  log(`recording ${seconds}s (loopSeconds=${loopSeconds} ×${loops} loops)…`);
-  await sleep(seconds * 1000);
+  const seconds = Number(process.env.CAPTURE_SECONDS) || loopSeconds; // 기본=한 바퀴(이음새 0)
+  const total = Math.round(seconds * FPS);
+  log(`capturing ${total} frames (${seconds}s × ${FPS}fps, loopSeconds=${loopSeconds})…`);
 
-  // closing the context flushes the .webm to disk
+  // 모든 애니메이션 일시정지 → 프레임마다 정확히 seek (균일 모션의 핵심)
+  await page.evaluate(() => { for (const a of document.getAnimations()) a.pause(); });
+
+  const clip = { x: 0, y: 0, width: VIDEO_W, height: VIDEO_H };
+  for (let i = 0; i < total; i++) {
+    const tMs = (i / FPS) * 1000;
+    await page.evaluate((t) => {
+      for (const a of document.getAnimations()) { try { a.currentTime = t; } catch {} }
+    }, tMs);
+    await page.screenshot({ path: join(FRAMES, `f${String(i).padStart(5, "0")}.png`), clip, type: "png" });
+    if (i && i % 150 === 0) log(`  ${i}/${total}`);
+  }
+
   await page.close();
   await context.close();
   await browser.close();
 
-  const webm = (await readdir(OUT)).filter((f) => f.endsWith(".webm")).map((f) => join(OUT, f))[0];
-  if (!webm) throw new Error("no .webm produced by Playwright");
-  log("transcoding → out/ticker.mp4 …");
-  await transcode(webm, join(OUT, "ticker.mp4"), seconds);
-  await rm(webm).catch(() => {});
+  log("encoding → out/ticker.mp4 …");
+  await encodeFrames(join(OUT, "ticker.mp4"), seconds);
+  await rm(FRAMES, { recursive: true, force: true });
   log("✓ done → out/ticker.mp4");
 } catch (e) {
   console.error("[capture] ✗", e.message);
