@@ -105,7 +105,10 @@ async function main() {
   }
   log(MOCK ? "MOCK 모드 (fixtures)" : `실 API: ${BASE_URL}`);
 
-  const wl = JSON.parse(await readFile(resolve(ROOT, "data/watchlist.json"), "utf8"));
+  // 워치리스트 선택: 환경변수 WATCHLIST_FILE(예: data/watchlist.jp.json) > 기본 data/watchlist.json
+  const WL_FILE = process.env.WATCHLIST_FILE || "data/watchlist.json";
+  const wl = JSON.parse(await readFile(resolve(ROOT, WL_FILE), "utf8"));
+  log(`워치리스트: ${WL_FILE}`);
   const topN = wl.topN ?? wl.cards.length;
   // 실제 카드 사진(TCGPlayer CDN) 사용 토글. ⚠️ 포켓몬/TCGPlayer IP — §6 가드레일 검토 후 켤 것.
   // watchlist.json 의 "cardImages": true 또는 env PPT_CARD_IMAGES=1 일 때만 img 채움.

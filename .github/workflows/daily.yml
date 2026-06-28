@@ -17,6 +17,11 @@ on:
         description: "발행까지 실행(시크릿 필요)"
         type: boolean
         default: false
+      watchlist:
+        description: "버전 강제(jp/en). 비우면 날짜 홀짝 자동"
+        type: choice
+        options: ["", "jp", "en"]
+        default: ""
 
 jobs:
   build:
@@ -59,6 +64,15 @@ jobs:
         run: |
           ARGS=""
           if [ "${{ inputs.mock }}" = "true" ]; then ARGS="$ARGS --mock"; fi
+          # 매일 홀짝 교대: 연중일(day-of-year) 짝수=일본판 / 홀수=미국판
+          if [ -n "${{ inputs.watchlist }}" ]; then
+            export WATCHLIST_FILE="data/watchlist.${{ inputs.watchlist }}.json"   # 수동 dispatch 시 강제(jp/en)
+          elif [ $(( $(date -u +%-j) % 2 )) -eq 0 ]; then
+            export WATCHLIST_FILE=data/watchlist.jp.json
+          else
+            export WATCHLIST_FILE=data/watchlist.en.json
+          fi
+          echo "오늘 버전: $WATCHLIST_FILE"
           node scripts/pipeline.mjs $ARGS
 
       - name: upload mp4
