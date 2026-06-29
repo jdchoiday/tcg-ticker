@@ -109,6 +109,11 @@ async function main() {
   const WL_FILE = process.env.WATCHLIST_FILE || "data/watchlist.json";
   const wl = JSON.parse(await readFile(resolve(ROOT, WL_FILE), "utf8"));
   log(`워치리스트: ${WL_FILE}`);
+  // 가격 이력(무버스): 카드별 직전 가격으로 변동% 계산, data/history.json 에 누적.
+  const HIST_FILE = resolve(ROOT, "data/history.json");
+  let history = {};
+  try { history = JSON.parse(await readFile(HIST_FILE, "utf8")); } catch { /* 첫 실행 */ }
+  const today = new Date().toISOString().slice(0, 10);
   const topN = wl.topN ?? wl.cards.length;
   // 실제 카드 사진(TCGPlayer CDN) 사용 토글. ⚠️ 포켓몬/TCGPlayer IP — §6 가드레일 검토 후 켤 것.
   // watchlist.json 의 "cardImages": true 또는 env PPT_CARD_IMAGES=1 일 때만 img 채움.
@@ -144,19 +149,27 @@ async function main() {
       seenIds.add(pid);
     }
 
+    // 무버스: 직전 기록 대비 변동%(분수). 이력 없으면 null(배지 미표시).
+    const histId = String(pid ?? it.query);
+    const prev = history[histId];
+    const change = (prev && prev.usd > 0)
+      ? Math.round(((got.usd - prev.usd) / prev.usd) * 1000) / 1000
+      : null;
+
     const krw = Math.round(got.usd * KRW_PER_USD);
     rows.push({
       nameKo: it.nameKo, nameEn: it.nameEn, set: it.set, rarity: it.rarity,
       type: it.type, lang: it.lang, grade: it.grade,
       ...(it.pop ? { pop: it.pop } : {}),
       krw,
+      ...(change != null ? { change } : {}),
       // 이미지 우선순위: 권리정리 수동 img > API 이미지 > tcgPlayerId 로 직접 생성한 CDN URL.
       // (API가 이미지 필드를 누락해도 매칭된 상품 id 로 항상 이미지 확보 → 빈 카드 방지)
       img: CARD_IMAGES
         ? (it.img || card.imageCdnUrl400 || card.imageCdnUrl ||
            (pid != null ? `https://tcgplayer-cdn.tcgplayer.com/product/${pid}_in_400x400` : null))
         : null,
-      _usd: got.usd, _src: got.source,
+      _usd: got.usd, _src: got.source, _id: histId,
     });
   }
 
@@ -179,11 +192,16 @@ async function main() {
 
   rows.sort((a, b) => b._usd - a._usd);
   const out = rows.slice(0, topN).map((r, i) => {
-    const { _usd, _src, ...card } = r;
+    const { _usd, _src, _id, ...card } = r;
     return { rank: i + 1, ...card };
   });
 
   await writeFile(resolve(ROOT, "data/cards.json"), JSON.stringify(out, null, 2) + "\n", "utf8");
+  // 오늘 가격을 이력에 기록(다음 실행의 변동% 기준). mock 은 실가격 오염 방지로 기록 안 함.
+  if (!MOCK) {
+    for (const r of rows) history[r._id] = { usd: r._usd, date: today };
+    await writeFile(HIST_FILE, JSON.stringify(history, null, 2) + "\n", "utf8");
+  }
   log(`✓ ${out.length}장 → data/cards.json (1위 ${out[0].nameKo} $${rows[0]._usd})`);
   if (CARD_IMAGES) log(`  카드 이미지: ${out.filter((c) => c.img).length}/${out.length}`);
   if (!MOCK && LAST_REMAINING != null) log(`  남은 크레딧(일일): ${LAST_REMAINING}`);

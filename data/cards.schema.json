@@ -24,6 +24,7 @@
       "grade":  { "type": "string", "minLength": 1, "description": "Grading brand + score, e.g. 'PSA 10'" },
       "pop":    { "type": ["string","null"], "description": "Optional population, e.g. 'POP 210'. Omit or null to hide." },
       "krw":    { "type": "number", "exclusiveMinimum": 0, "description": "Latest price in KRW. USD/VND are derived." },
+      "change": { "type": ["number","null"], "description": "Price change vs previous snapshot, fraction (0.032 = +3.2%). null/omit if no prior history." },
       "img":    { "type": ["string","null"], "description": "Real card photo URL, or null for the styled placeholder card. See guardrails in CLAUDE.md." }
     }
   }

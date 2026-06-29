@@ -164,8 +164,12 @@
   .pop{font-size:22px;color:var(--muted);font-family:"Space Mono",monospace;}
   .price-usd{font-family:"Space Mono",monospace;font-weight:700;font-size:68px;
              letter-spacing:-.02em;line-height:1;}
-  .price-vnd{font-family:"Space Mono",monospace;font-weight:700;font-size:38px;
-             color:var(--vnd);margin-top:9px;}
+  /* 무버스: 변동% 배지 (▲상승 초록 / ▼하락 빨강) — 가격 옆 같은 줄 */
+  .price-row{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;}
+  .chg{font-family:"Space Mono",monospace;font-weight:700;font-size:32px;
+       padding:4px 14px;border-radius:10px;}
+  .chg.up{color:#5BC47A;background:rgba(91,196,122,.12);}
+  .chg.down{color:#F0743C;background:rgba(240,116,60,.12);}
   .rankpill{position:absolute;}
   .col .rank{margin-top:18px;display:inline-flex;align-items:center;gap:12px;
              font-family:"Space Mono",monospace;font-weight:700;font-size:40px;}
@@ -331,7 +335,10 @@ function cardHTML(c){
          <span class="grade">${c.grade}</span>
          ${c.pop?`<span class="pop">${c.pop}</span>`:""}
        </div>
-       <div class="price-usd">${fmtUsd(usd)}</div>
+       <div class="price-row">
+         <span class="price-usd">${fmtUsd(usd)}</span>
+         ${c.change!=null?`<span class="chg ${c.change>=0?"up":"down"}">${c.change>=0?"▲":"▼"} ${(Math.abs(c.change)*100).toFixed(1)}%</span>`:""}
+       </div>
      </div>
      <div class="rank"><span class="hash">#${c.rank}</span><span class="lbl">RANK</span></div>
    </div>`;
@@ -380,8 +387,8 @@ function render(cards){
     const st = document.createElement("style");
     st.textContent =
       `#track{gap:0!important;padding:0!important;animation:stepmove ${CONFIG.loopSeconds}s infinite!important}` +
-      `.col{width:${W}px!important;justify-content:flex-start;padding-top:14px}` +
-      `.card{width:680px;height:952px}.info{width:680px;margin-top:16px}` +
+      `.col{width:${W}px!important;justify-content:flex-start;padding-top:8px}` +
+      `.card{width:650px;height:910px}.info{width:650px;margin-top:14px}` +
       // 언어칩: 카드 밖 왼쪽위 빈공간(카드 안 가림)
       `.lang{top:18px;left:48px;font-size:24px;padding:8px 18px}` +
       `@keyframes stepmove{${kf}}`;
