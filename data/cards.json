@@ -56,7 +56,7 @@
     "type": "dark",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 6750000,
+    "krw": 6718965,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/246723_in_400x400.jpg"
   },
   {
@@ -68,7 +68,7 @@
     "type": "dragon",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 4844985,
+    "krw": 4943550,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/284137_in_400x400.jpg"
   },
   {
@@ -80,7 +80,7 @@
     "type": "dragon",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 4330500,
+    "krw": 4412085,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/246733_in_400x400.jpg"
   },
   {
@@ -109,18 +109,6 @@
   },
   {
     "rank": 10,
-    "nameKo": "Lugia V",
-    "nameEn": "Alt Art",
-    "set": "Silver Tempest 186/195",
-    "rarity": "SAR",
-    "type": "psychic",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 2399985,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/451834_in_400x400.jpg"
-  },
-  {
-    "rank": 11,
     "nameKo": "Gyarados",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 6/102",
@@ -132,43 +120,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/107000_in_400x400.jpg"
   },
   {
-    "rank": 12,
-    "nameKo": "Charizard ex",
-    "nameEn": "Special Illustration Rare",
-    "set": "Obsidian Flames 223/197",
-    "rarity": "SIR",
-    "type": "fire",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 1147500,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/509980_in_400x400.jpg"
-  },
-  {
-    "rank": 13,
-    "nameKo": "Leafeon VMAX",
-    "nameEn": "Alt Art",
-    "set": "Evolving Skies 205/203",
-    "rarity": "SAR",
-    "type": "grass",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 943500,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/246696_in_400x400.jpg"
-  },
-  {
-    "rank": 14,
-    "nameKo": "Glaceon VMAX",
-    "nameEn": "Alt Art",
-    "set": "Evolving Skies 209/203",
-    "rarity": "SAR",
-    "type": "water",
-    "lang": "EN",
-    "grade": "PSA 10",
-    "krw": 900465,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/246756_in_400x400.jpg"
-  },
-  {
-    "rank": 15,
+    "rank": 11,
     "nameKo": "Mew VMAX",
     "nameEn": "Alt Art",
     "set": "Fusion Strike 268/264",
@@ -180,7 +132,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/253177_in_400x400.jpg"
   },
   {
-    "rank": 16,
+    "rank": 12,
     "nameKo": "Charizard VMAX",
     "nameEn": "Rainbow Rare",
     "set": "Champion's Path 074/073",
@@ -192,7 +144,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/223073_in_400x400.jpg"
   },
   {
-    "rank": 17,
+    "rank": 13,
     "nameKo": "Rayquaza ★",
     "nameEn": "Gold Star",
     "set": "EX Deoxys 107/107",
@@ -204,7 +156,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/88643_in_400x400.jpg"
   },
   {
-    "rank": 18,
+    "rank": 14,
     "nameKo": "Venusaur",
     "nameEn": "1st Edition Holo",
     "set": "Base Set 15/102",
@@ -212,7 +164,7 @@
     "type": "grass",
     "lang": "EN",
     "grade": "PSA 10",
-    "krw": 231540,
+    "krw": 234630,
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/42355_in_400x400.jpg"
   }
 ]
