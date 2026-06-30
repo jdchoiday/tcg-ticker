@@ -374,25 +374,31 @@ function render(cards){
 
   const track = document.getElementById("track");
   if (CONFIG.motion === "step") {
-    // 한 장씩(카드 폭=화면 폭) 가운데 크게 보여주고 다음 카드로 넘어가는 스텝 카루셀
-    const W = 1080, n = cards.length, hold = 0.80; // hold=슬롯 중 정지 비율
-    track.innerHTML = cards.map(cardHTML).join("") + cardHTML(cards[0]); // 마지막→첫장 seamless wrap
-    let kf = "";
-    for (let i = 0; i < n; i++) {
-      const s = (i / n) * 100, h = ((i + hold) / n) * 100;
-      kf += `${s.toFixed(3)}%{transform:translateX(${-i * W}px)}`;
-      kf += `${h.toFixed(3)}%{transform:translateX(${-i * W}px);animation-timing-function:cubic-bezier(.6,0,.3,1)}`;
-    }
-    kf += `100%{transform:translateX(${-n * W}px)}`;
+    // 한 장씩 가운데 크게 보여주고 다음 카드로 "제자리 크로스페이드" 전환.
+    // (가로 슬라이드는 전환 중 두 카드 글씨가 양옆에 겹쳐 보여서, 디졸브 방식으로 변경)
+    const n = cards.length, slot = 100 / n, fade = Math.min(1.6, slot * 0.3);
+    track.innerHTML = cards.map(cardHTML).join("");
+    // 윈도우가 fade 만큼 겹쳐서 이전↔다음 카드가 동시에 교차 페이드(빈 화면 없음)
+    const kf =
+      `0%{opacity:0;transform:scale(.965)}` +
+      `${fade.toFixed(2)}%{opacity:1;transform:scale(1)}` +
+      `${slot.toFixed(2)}%{opacity:1;transform:scale(1)}` +
+      `${(slot + fade).toFixed(2)}%{opacity:0;transform:scale(.965)}` +
+      `100%{opacity:0;transform:scale(.965)}`;
     const st = document.createElement("style");
     st.textContent =
-      `#track{gap:0!important;padding:0!important;animation:stepmove ${CONFIG.loopSeconds}s infinite!important}` +
-      `.col{width:${W}px!important;justify-content:flex-start;padding-top:8px}` +
+      // 카드들을 같은 자리에 쌓고, 각자 자기 구간에만 페이드인 → 전환 시 양옆 겹침 없음
+      `#track{position:absolute!important;inset:0;display:block!important;gap:0!important;padding:0!important;animation:none!important}` +
+      `.col{position:absolute!important;inset:0;width:100%!important;justify-content:flex-start;padding-top:8px;` +
+        `opacity:0;animation:fadeslot ${CONFIG.loopSeconds}s linear infinite}` +
       `.card{width:650px;height:910px}.info{width:650px;margin-top:14px}` +
-      // 언어칩: 카드 밖 왼쪽위 빈공간(카드 안 가림)
       `.lang{top:18px;left:48px;font-size:24px;padding:8px 18px}` +
-      `@keyframes stepmove{${kf}}`;
+      `@keyframes fadeslot{${kf}}`;
     document.head.appendChild(st);
+    // 각 카드를 자기 구간으로 시프트(음수 delay)
+    [...track.children].forEach((el, i) => {
+      el.style.animationDelay = `${(-(i * CONFIG.loopSeconds / n)).toFixed(3)}s`;
+    });
   } else {
     const html = cards.map(cardHTML).join("");
     track.innerHTML = html + html;            // 무한 루프용 2회 복제
