@@ -75,11 +75,11 @@ async function discoverErrorFragments(token) {
 }
 
 /* 한 채널 1회 발행 시도 → {ok, status?, typename?, message?} (throw 안 함) */
-async function tryPost(token, mutation, { channelId, caption, videoUrl, mode, saveDraft }) {
+async function tryPost(token, mutation, { channelId, caption, videoUrl, mode, saveDraft, schedulingType = "automatic" }) {
   const input = {
     channelId,
     text: caption,
-    schedulingType: "automatic",
+    schedulingType,                                // "automatic"(완전자동) | "notification"(앱 알림→수동 게시; FB 그룹 등)
     mode,                                          // ShareMode: addToQueue|shareNow|shareNext|customScheduled
     assets: [{ video: { url: videoUrl } }],        // VideoAssetInput { url(필수), thumbnailUrl?, metadata? }
     ...(saveDraft ? { saveToDraft: true } : {}),   // 초안 모드
@@ -108,9 +108,16 @@ async function postToBuffer({ token, channelIds, caption, videoUrl, saveDraft })
   const results = [];
   for (const channelId of channelIds) {
     let out = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft });
-    // 큐 발행(addToQueue) 실패(예: 채널에 발행 스케줄 없음) → 초안으로 폴백해 최소한 검수용으로 남김
+    // FB 그룹 등 완전자동 미지원 채널: "notification scheduling" 요구 시 알림 예약으로 재시도.
+    // → Buffer 앱이 게시 시간에 알림을 보내고, 사용자가 탭하면 그룹에 게시(반자동. Meta 정책상 그룹 완전자동 불가).
+    if (!out.ok && /notification scheduling/i.test(out.message || "")) {
+      warn(`채널 ${channelId} 완전자동 미지원: ${out.message} → 알림(notification) 예약으로 재시도`);
+      const notif = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, schedulingType: "notification" });
+      out = notif.ok ? { ...notif, note: "notification·앱 알림→수동 게시" } : notif;
+    }
+    // 그래도 실패면 초안으로 폴백해 최소한 검수용으로 남김
     if (!out.ok && !saveDraft) {
-      warn(`채널 ${channelId} ${MODE} 실패: ${out.typename}${out.message ? " — " + out.message : ""} → 초안(draft)으로 재시도`);
+      warn(`채널 ${channelId} 실패: ${out.typename}${out.message ? " — " + out.message : ""} → 초안(draft)으로 재시도`);
       const draft = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft: true });
       if (draft.ok) out = { ...draft, note: "draft-fallback" };
     }
