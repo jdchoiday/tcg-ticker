@@ -56,30 +56,66 @@ async function gql(token, query, variables) {
   return json;
 }
 
-/* createPost: 채널별로 영상 URL + 캡션 발행 */
+/* createPost 반환 유니온의 에러 멤버 타입 중 message 필드가 있는 것 → 실패 사유 출력용.
+   스키마에 실재하는 타입만 fragment 로 넣어 쿼리 깨짐 방지. 실패 시 빈 문자열(기존 동작). */
+async function discoverErrorFragments(token) {
+  try {
+    const md = await gql(token, `query{ __type(name:"Mutation"){ fields{ name type{ name kind ofType{ name kind ofType{ name } } } } } }`);
+    const f = (md.data?.__type?.fields || []).find((x) => x.name === "createPost");
+    let rt = f?.type;
+    while (rt && !rt.name && rt.ofType) rt = rt.ofType; // NON_NULL 등 언랩
+    if (!rt?.name) return "";
+    const td = await gql(token, `query{ __type(name:"${rt.name}"){ possibleTypes{ name fields{ name } } } }`);
+    const pts = td.data?.__type?.possibleTypes || [];
+    return pts
+      .filter((pt) => pt.name !== "PostActionSuccess" && (pt.fields || []).some((fl) => fl.name === "message"))
+      .map((pt) => `... on ${pt.name} { message }`)
+      .join("\n");
+  } catch { return ""; }
+}
+
+/* 한 채널 1회 발행 시도 → {ok, status?, typename?, message?} (throw 안 함) */
+async function tryPost(token, mutation, { channelId, caption, videoUrl, mode, saveDraft }) {
+  const input = {
+    channelId,
+    text: caption,
+    schedulingType: "automatic",
+    mode,                                          // ShareMode: addToQueue|shareNow|shareNext|customScheduled
+    assets: [{ video: { url: videoUrl } }],        // VideoAssetInput { url(필수), thumbnailUrl?, metadata? }
+    ...(saveDraft ? { saveToDraft: true } : {}),   // 초안 모드
+  };
+  try {
+    const json = await gql(token, mutation, { input });
+    if (json.errors) return { ok: false, typename: "GraphQLError", message: JSON.stringify(json.errors).slice(0, 240) };
+    const r = json.data?.createPost;
+    if (r?.__typename === "PostActionSuccess") return { ok: true, status: r.post?.status, id: r.post?.id };
+    return { ok: false, typename: r?.__typename || "Unknown", message: r?.message };
+  } catch (e) {
+    return { ok: false, typename: "Exception", message: e.message };
+  }
+}
+
+/* createPost: 채널별로 영상 URL + 캡션 발행. 채널 하나가 실패해도 나머지는 계속 진행. */
 async function postToBuffer({ token, channelIds, caption, videoUrl, saveDraft }) {
+  const errFrags = await discoverErrorFragments(token);
   const mutation = `mutation CreatePost($input: CreatePostInput!) {
     createPost(input: $input) {
       __typename
       ... on PostActionSuccess { post { id status } }
+      ${errFrags}
     }
   }`;
   const results = [];
   for (const channelId of channelIds) {
-    const input = {
-      channelId,
-      text: caption,
-      schedulingType: "automatic",
-      mode: MODE,                                   // ShareMode: addToQueue|shareNow|shareNext|customScheduled
-      assets: [{ video: { url: videoUrl } }],       // VideoAssetInput { url(필수), thumbnailUrl?, metadata? }
-      ...(saveDraft ? { saveToDraft: true } : {}), // 초안 모드(테스트 또는 품질 가드)
-    };
-    const json = await gql(token, mutation, { input });
-    results.push({ channelId, json });
-    log(`  채널 ${channelId} 응답: ${JSON.stringify(json).slice(0, 500)}`);
-    if (json.errors) throw new Error("GraphQL 오류 — 위 응답으로 스키마 보정 필요");
-    const r = json.data?.createPost;
-    if (r && r.__typename !== "PostActionSuccess") throw new Error("Buffer 비성공 응답: " + JSON.stringify(r));
+    let out = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft });
+    // 큐 발행(addToQueue) 실패(예: 채널에 발행 스케줄 없음) → 초안으로 폴백해 최소한 검수용으로 남김
+    if (!out.ok && !saveDraft) {
+      warn(`채널 ${channelId} ${MODE} 실패: ${out.typename}${out.message ? " — " + out.message : ""} → 초안(draft)으로 재시도`);
+      const draft = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft: true });
+      if (draft.ok) out = { ...draft, note: "draft-fallback" };
+    }
+    results.push({ channelId, ...out });
+    log(`  채널 ${channelId}: ${out.ok ? "✓ " + (out.status || "ok") + (out.note ? " (" + out.note + ")" : "") : "✗ " + out.typename + (out.message ? " — " + out.message : "")}`);
   }
   return results;
 }
@@ -120,7 +156,12 @@ async function main() {
 
   log(`발행 시도 (mode=${MODE}, ${channelIds.length}개 채널, ${saveDraft ? "초안" : "라이브"})…`);
   const r = await postToBuffer({ token, channelIds, caption, videoUrl, saveDraft });
-  log("✓ 완료:", JSON.stringify(r).slice(0, 300));
+  const ok = r.filter((x) => x.ok);
+  const bad = r.filter((x) => !x.ok);
+  log(`발행 결과: ${ok.length}/${r.length} 성공`);
+  if (bad.length) warn(`실패 채널: ${bad.map((x) => `${x.channelId}(${x.typename})`).join(", ")}`);
+  // 한 채널이라도 성공하면 워크플로는 성공 처리(예: 틱톡 성공 + 페북 실패 → 틱톡 살림). 전부 실패 시에만 실패.
+  if (ok.length === 0) { console.error("[publish] ✗ 모든 채널 발행 실패"); process.exit(1); }
 }
 
 main().catch((e) => { console.error("[publish] ✗", e.message); process.exit(1); });
