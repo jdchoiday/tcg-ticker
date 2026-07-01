@@ -21,24 +21,51 @@ async function gql(query) {
   return json.data;
 }
 
+// 채널이 "발행 가능한 건강 상태"인지 판정. Buffer 채널 타입의 상태 필드는
+// 버전마다 이름이 달라서, introspection 으로 실재하는 필드만 골라 조회한다.
+const HEALTH_FIELDS = [
+  "isDisconnected", "shouldReconnect", "needsReconnection",
+  "accessTokenExpired", "isLocked", "isQueuePaused", "locked",
+];
+let HEALTH_AVAILABLE = []; // 런타임에 채워짐
+
+function healthLabel(c) {
+  const bad = [];
+  if (c.isDisconnected || c.shouldReconnect || c.needsReconnection || c.accessTokenExpired)
+    bad.push("재연결 필요(reconnect)");
+  if (c.isLocked || c.locked) bad.push("잠김(locked)");
+  if (c.isQueuePaused) bad.push("큐 일시정지(queue paused)");
+  if (HEALTH_AVAILABLE.length === 0) return "  (상태필드 미지원 — 연결됨만 확인)";
+  return bad.length ? `  ⚠️ ${bad.join(", ")}` : "  ✅ 발행 가능(연결 정상)";
+}
+
 function printChannels(orgName, channels) {
   for (const c of channels) {
     const star = /tiktok/i.test(c.service) ? "  ⭐ ← BUFFER_PROFILE_IDS 에 이 id" : "";
     console.log(`  [${c.service}] ${c.name}  → id: ${c.id}${star}`);
+    console.log(`        상태:${healthLabel(c)}`);
   }
 }
 
 try {
+  // 0) Channel 타입에 실제로 존재하는 상태 필드만 추려낸다(없는 필드 쿼리 시 전체 실패 방지).
+  try {
+    const ct = await gql(`query{ __type(name:"Channel"){ fields{ name } } }`);
+    const names = new Set((ct.__type?.fields || []).map((f) => f.name));
+    HEALTH_AVAILABLE = HEALTH_FIELDS.filter((f) => names.has(f));
+  } catch { HEALTH_AVAILABLE = []; }
+  const healthSel = HEALTH_AVAILABLE.join(" "); // 쿼리에 끼울 필드 목록
+
   // 1) 중첩 쿼리 시도 (org + channels 한 번에)
   let data;
   try {
-    data = await gql(`query{ account{ organizations{ id name channels{ id name service } } } }`);
+    data = await gql(`query{ account{ organizations{ id name channels{ id name service ${healthSel} } } } }`);
   } catch (e) {
     console.log("• 중첩 쿼리 실패, org→channels 분리 시도:", e.message);
     const od = await gql(`query{ account{ organizations{ id name } } }`);
     data = { account: { organizations: [] } };
     for (const o of od.account.organizations) {
-      const cd = await gql(`query{ channels(input:{ organizationId:"${o.id}" }){ id name service } }`);
+      const cd = await gql(`query{ channels(input:{ organizationId:"${o.id}" }){ id name service ${healthSel} } }`);
       data.account.organizations.push({ ...o, channels: cd.channels });
     }
   }
