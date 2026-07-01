@@ -261,7 +261,7 @@ const CONFIG = {
   tagline   : "Daily graded-card price index",
   ctaLine1  : "💎 Today's Grails, Ranked 🔥",        // 빈 공간 후킹 카피
   ctaLine2  : "🔔 Follow @tcgvbm",
-  motion    : "step",          // "step"=한 장씩 카루셀(기본) | "scroll"=연속 가로 스크롤
+  motion    : "step",          // "step"=한 장씩 가로 슬라이드(필름스트립) | "scroll"=연속 가로 스크롤
   loopSeconds : 40,            // 전체 한 바퀴(=카드수×장당 노출). 18장이면 장당 ~2.2s.
   dataUrl   : "../data/cards.json", // Phase 0: 데이터/뷰 분리. 실패 시 DEMO_CARDS 폴백.
   fx : {                        // 환율 (추정) — 기준일 표기됨
@@ -374,31 +374,34 @@ function render(cards){
 
   const track = document.getElementById("track");
   if (CONFIG.motion === "step") {
-    // 한 장씩 가운데 크게 보여주고 다음 카드로 "제자리 크로스페이드" 전환.
-    // (가로 슬라이드는 전환 중 두 카드 글씨가 양옆에 겹쳐 보여서, 디졸브 방식으로 변경)
-    const n = cards.length, slot = 100 / n, fade = Math.min(1.6, slot * 0.3);
-    track.innerHTML = cards.map(cardHTML).join("");
-    // 윈도우가 fade 만큼 겹쳐서 이전↔다음 카드가 동시에 교차 페이드(빈 화면 없음)
-    const kf =
-      `0%{opacity:0;transform:scale(.965)}` +
-      `${fade.toFixed(2)}%{opacity:1;transform:scale(1)}` +
-      `${slot.toFixed(2)}%{opacity:1;transform:scale(1)}` +
-      `${(slot + fade).toFixed(2)}%{opacity:0;transform:scale(.965)}` +
-      `100%{opacity:0;transform:scale(.965)}`;
+    // 필름스트립 가로 슬라이드: 카드마다 프레임(1080px) 하나를 꽉 채우고 가운데 정렬 →
+    // 잠깐 정지(hold) 후 한 장씩 왼쪽으로 밀려 다음 카드로 넘어감(예전 방식).
+    // 각 카드가 자기 컬럼(=1프레임) 안에만 있으므로 전환 중에도 글씨 겹침 없음.
+    // 끝에 첫 카드 클론을 붙여 마지막→처음 이음새 없이 루프.
+    const n = cards.length;
+    const FRAME = 1080;                          // 한 프레임 = 스테이지 폭(px). 퍼센트 대신 고정 px(무너짐 방지).
+    const frames = cards.concat([cards[0]]);     // n+1 (마지막=첫장 클론 → 이음새 없는 루프)
+    const total = frames.length;                 // n+1
+    track.innerHTML = frames.map(cardHTML).join("");
+    const slot = 100 / n;                        // 타임라인상 카드 1장 구간(%)
+    const slide = Math.min(4, slot * 0.22);      // 넘김에 쓰는 짧은 구간(작을수록 빠른 스냅)
+    let kf = "";
+    for (let i = 0; i <= n; i++) {
+      const x = -(i * FRAME);                     // i번째 카드가 가운데 오도록 트랙을 왼쪽으로 이동(px)
+      kf += `${(i * slot).toFixed(3)}%{transform:translateX(${x}px)}`;
+      if (i < n) kf += `${((i + 1) * slot - slide).toFixed(3)}%{transform:translateX(${x}px)}`; // 다음 카드 직전까지 정지(hold)
+    }
     const st = document.createElement("style");
     st.textContent =
-      // 카드들을 같은 자리에 쌓고, 각자 자기 구간에만 페이드인 → 전환 시 양옆 겹침 없음
-      `#track{position:absolute!important;inset:0;display:block!important;gap:0!important;padding:0!important;animation:none!important}` +
-      `.col{position:absolute!important;inset:0;width:100%!important;justify-content:flex-start;padding-top:8px;` +
-        `opacity:0;animation:fadeslot ${CONFIG.loopSeconds}s linear infinite}` +
+      `#track{display:flex!important;gap:0!important;padding:0!important;width:${total * FRAME}px!important;` +
+        `animation:slidestep ${CONFIG.loopSeconds}s linear infinite!important}` +
+      // 각 컬럼이 정확히 한 프레임(1080px) 폭 → 카드가 프레임 가운데 정렬, 정지 시 오직 1장만 보임
+      `.col{width:${FRAME}px!important;flex:0 0 ${FRAME}px!important;justify-content:flex-start;padding-top:8px}` +
       `.card{width:650px;height:910px}.info{width:650px;margin-top:14px}` +
-      `.lang{top:18px;left:48px;font-size:24px;padding:8px 18px}` +
-      `@keyframes fadeslot{${kf}}`;
+      // 카드(650px)가 프레임 가운데이므로 lang 칩을 카드 좌상단 근처로
+      `.lang{top:20px;left:calc(50% - 325px);font-size:24px;padding:8px 18px}` +
+      `@keyframes slidestep{${kf}}`;
     document.head.appendChild(st);
-    // 각 카드를 자기 구간으로 시프트(음수 delay)
-    [...track.children].forEach((el, i) => {
-      el.style.animationDelay = `${(-(i * CONFIG.loopSeconds / n)).toFixed(3)}s`;
-    });
   } else {
     const html = cards.map(cardHTML).join("");
     track.innerHTML = html + html;            // 무한 루프용 2회 복제
