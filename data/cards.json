@@ -1,19 +1,6 @@
 [
   {
     "rank": 1,
-    "nameKo": "ピカチュウ",
-    "nameEn": "Pikachu Promo",
-    "set": "プロモ 208/S-P",
-    "rarity": "Promo",
-    "type": "electric",
-    "lang": "JP",
-    "grade": "PSA 10",
-    "krw": 19987485,
-    "change": 0,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/598090_in_400x400.jpg"
-  },
-  {
-    "rank": 2,
     "nameKo": "ギラティナV",
     "nameEn": "Giratina V SA",
     "set": "ロストアビス 110/100",
@@ -26,7 +13,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/570042_in_400x400.jpg"
   },
   {
-    "rank": 3,
+    "rank": 2,
     "nameKo": "ニンフィアVMAX",
     "nameEn": "Sylveon VMAX SA",
     "set": "イーブイヒーローズ 093/069",
@@ -39,7 +26,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/570555_in_400x400.jpg"
   },
   {
-    "rank": 4,
+    "rank": 3,
     "nameKo": "ルギアV",
     "nameEn": "Lugia V SA",
     "set": "パラダイムトリガー 139/098",
@@ -52,7 +39,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/570168_in_400x400.jpg"
   },
   {
-    "rank": 5,
+    "rank": 4,
     "nameKo": "ミュウVMAX",
     "nameEn": "Mew VMAX SA",
     "set": "フュージョンアーツ 218/172",
@@ -65,7 +52,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/569620_in_400x400.jpg"
   },
   {
-    "rank": 6,
+    "rank": 5,
     "nameKo": "グレイシアVMAX",
     "nameEn": "Glaceon VMAX SA",
     "set": "イーブイヒーローズ 092/069",
@@ -78,7 +65,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/570553_in_400x400.jpg"
   },
   {
-    "rank": 7,
+    "rank": 6,
     "nameKo": "リーフィアVMAX",
     "nameEn": "Leafeon VMAX SA",
     "set": "イーブイヒーローズ 091/069",
@@ -91,7 +78,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/570551_in_400x400.jpg"
   },
   {
-    "rank": 8,
+    "rank": 7,
     "nameKo": "リザードンex",
     "nameEn": "Charizard ex SAR",
     "set": "シャイニートレジャーex 333/190",
@@ -104,7 +91,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/567748_in_400x400.jpg"
   },
   {
-    "rank": 9,
+    "rank": 8,
     "nameKo": "レックウザVMAX",
     "nameEn": "Rayquaza VMAX SSR",
     "set": "VMAXクライマックス 086/184",
@@ -117,20 +104,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/571504_in_400x400.jpg"
   },
   {
-    "rank": 10,
-    "nameKo": "ナンジャモ",
-    "nameEn": "Iono SAR",
-    "set": "クレイバースト 080/071",
-    "rarity": "SAR",
-    "type": "electric",
-    "lang": "JP",
-    "grade": "PSA 10",
-    "krw": 605235,
-    "change": 0,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/565958_in_400x400.jpg"
-  },
-  {
-    "rank": 11,
+    "rank": 9,
     "nameKo": "ブラッキーVMAX",
     "nameEn": "Umbreon VMAX SA",
     "set": "イーブイヒーローズ 095/069",
@@ -143,7 +117,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/570556_in_400x400.jpg"
   },
   {
-    "rank": 12,
+    "rank": 10,
     "nameKo": "リザードンV",
     "nameEn": "Charizard V SSR",
     "set": "シャイニースターV 307/190",
@@ -156,7 +130,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/571231_in_400x400.jpg"
   },
   {
-    "rank": 13,
+    "rank": 11,
     "nameKo": "エーフィVMAX",
     "nameEn": "Espeon VMAX SA",
     "set": "イーブイヒーローズ 094/069",
@@ -169,20 +143,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/594233_in_400x400.jpg"
   },
   {
-    "rank": 14,
-    "nameKo": "ミライドンex",
-    "nameEn": "Miraidon ex SAR",
-    "set": "バイオレットex 086/078",
-    "rarity": "SAR",
-    "type": "electric",
-    "lang": "JP",
-    "grade": "PSA 10",
-    "krw": 111750,
-    "change": 0,
-    "img": "https://tcgplayer-cdn.tcgplayer.com/product/568328_in_400x400.jpg"
-  },
-  {
-    "rank": 15,
+    "rank": 12,
     "nameKo": "シャワーズVMAX",
     "nameEn": "Vaporeon VMAX SA",
     "set": "イーブイヒーローズ 090/069",
@@ -195,7 +156,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/594231_in_400x400.jpg"
   },
   {
-    "rank": 16,
+    "rank": 13,
     "nameKo": "ブースターVMAX",
     "nameEn": "Flareon VMAX SA",
     "set": "イーブイヒーローズ 096/069",
@@ -208,7 +169,7 @@
     "img": "https://tcgplayer-cdn.tcgplayer.com/product/594230_in_400x400.jpg"
   },
   {
-    "rank": 17,
+    "rank": 14,
     "nameKo": "サンダースVMAX",
     "nameEn": "Jolteon VMAX SA",
     "set": "イーブイヒーローズ 089/069",
