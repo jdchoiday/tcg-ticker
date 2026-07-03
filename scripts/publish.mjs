@@ -75,13 +75,15 @@ async function discoverErrorFragments(token) {
 }
 
 /* 한 채널 1회 발행 시도 → {ok, status?, typename?, message?} (throw 안 함) */
-async function tryPost(token, mutation, { channelId, caption, videoUrl, mode, saveDraft, schedulingType = "automatic" }) {
+async function tryPost(token, mutation, { channelId, caption, videoUrl, mode, saveDraft, schedulingType = "automatic", fbType = null }) {
   const input = {
     channelId,
     text: caption,
     schedulingType,                                // "automatic"(완전자동) | "notification"(앱 알림→수동 게시; FB 그룹 등)
     mode,                                          // ShareMode: addToQueue|shareNow|shareNext|customScheduled
     assets: [{ video: { url: videoUrl } }],        // VideoAssetInput { url(필수), thumbnailUrl?, metadata? }
+    // FB는 게시 종류(post/story/reel)를 요구 → 요구한 채널에만 metadata.facebook.type 주입(다른 채널엔 안 붙임)
+    ...(fbType ? { metadata: { facebook: { type: fbType } } } : {}),
     ...(saveDraft ? { saveToDraft: true } : {}),   // 초안 모드
   };
   try {
@@ -105,20 +107,35 @@ async function postToBuffer({ token, channelIds, caption, videoUrl, saveDraft })
       ${errFrags}
     }
   }`;
+  const FB_TYPE = process.env.BUFFER_FB_TYPE || "post"; // FB 게시 종류: post(기본·그룹 호환) | story | reel
   const results = [];
   for (const channelId of channelIds) {
-    let out = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft });
-    // FB 그룹 등 완전자동 미지원 채널: "notification scheduling" 요구 시 알림 예약으로 재시도.
-    // → Buffer 앱이 게시 시간에 알림을 보내고, 사용자가 탭하면 그룹에 게시(반자동. Meta 정책상 그룹 완전자동 불가).
-    if (!out.ok && /notification scheduling/i.test(out.message || "")) {
-      warn(`채널 ${channelId} 완전자동 미지원: ${out.message} → 알림(notification) 예약으로 재시도`);
-      const notif = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, schedulingType: "notification" });
-      out = notif.ok ? { ...notif, note: "notification·앱 알림→수동 게시" } : notif;
+    // 채널이 요구하는 조건을 에러 메시지로 감지해 하나씩 보정하며 재시도(FB는 tiktok과 요구사항이 다름).
+    // fbType/notification 은 요구한 채널에만 적용 → tiktok 등 다른 채널엔 영향 없음.
+    let schedulingType = "automatic", fbType = null, note = "";
+    let out;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      out = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft, schedulingType, fbType });
+      if (out.ok) break;
+      const msg = out.message || "";
+      let changed = false;
+      // (1) 완전자동 미지원(FB 그룹 등) → 알림 예약. Buffer 앱이 알림 → 수동 탭 게시(반자동).
+      if (/notification scheduling/i.test(msg) && schedulingType !== "notification") {
+        schedulingType = "notification"; note = "notification·앱 알림→수동 게시"; changed = true;
+        warn(`채널 ${channelId} 완전자동 미지원 → 알림(notification) 예약으로 재시도`);
+      }
+      // (2) FB 게시 종류 요구 → metadata.facebook.type 주입
+      if (/require a type|post, story, or reel/i.test(msg) && !fbType) {
+        fbType = FB_TYPE; changed = true;
+        warn(`채널 ${channelId} FB 게시 종류 요구 → type="${FB_TYPE}" 로 재시도`);
+      }
+      if (!changed) break; // 새로 보정할 게 없으면 중단(무한재시도 방지)
     }
+    if (out.ok && note) out = { ...out, note };
     // 그래도 실패면 초안으로 폴백해 최소한 검수용으로 남김
     if (!out.ok && !saveDraft) {
       warn(`채널 ${channelId} 실패: ${out.typename}${out.message ? " — " + out.message : ""} → 초안(draft)으로 재시도`);
-      const draft = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft: true });
+      const draft = await tryPost(token, mutation, { channelId, caption, videoUrl, mode: MODE, saveDraft: true, fbType });
       if (draft.ok) out = { ...draft, note: "draft-fallback" };
     }
     results.push({ channelId, ...out });
