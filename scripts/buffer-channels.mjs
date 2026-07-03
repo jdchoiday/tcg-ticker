@@ -77,14 +77,29 @@ try {
   }
   console.log("\n→ 위에서 TikTok 채널의 id 를 GitHub Secret BUFFER_PROFILE_IDS 에 넣으세요(여러 개면 쉼표).");
 
-  // ── 스키마 introspection (publish.mjs 입력 형식 확정용) ──
-  const s = await gql(`query{
-    video: __type(name:"VideoAssetInput"){ inputFields{ name type{ name kind ofType{ name kind } } } }
-    sched: __type(name:"SchedulingType"){ enumValues{ name } }
-  }`);
-  console.log("\n=== SCHEMA ===");
-  console.log("VideoAssetInput.inputFields:", JSON.stringify(s.video?.inputFields));
-  console.log("SchedulingType.enumValues:", JSON.stringify(s.sched?.enumValues));
+  // ── 스키마 덤프: CreatePostInput → metadata → facebook 재귀 추적 ──
+  //    페북 게시 종류(post/story/reel)를 어느 필드에 넣는지 확정하기 위함.
+  const seen = new Set();
+  const unwrap = (t) => { while (t && !t.name && t.ofType) t = t.ofType; return t; };
+  async function dumpType(name, depth) {
+    if (!name || seen.has(name) || depth > 3) return;
+    seen.add(name);
+    let td;
+    try {
+      td = (await gql(`query{ __type(name:"${name}"){ kind inputFields{ name type{ name kind ofType{ name kind ofType{ name kind ofType{ name kind } } } } } enumValues{ name } } }`)).__type;
+    } catch (e) { console.log(`${"  ".repeat(depth)}(introspect ${name} 실패: ${e.message})`); return; }
+    if (!td) return;
+    if (td.enumValues?.length) { console.log(`${"  ".repeat(depth)}ENUM ${name}: ${td.enumValues.map((v) => v.name).join(", ")}`); return; }
+    const children = [];
+    for (const f of td.inputFields || []) {
+      const u = unwrap(f.type);
+      console.log(`${"  ".repeat(depth)}${name}.${f.name}: ${u?.name} (${u?.kind})`);
+      if (u && (u.kind === "INPUT_OBJECT" || u.kind === "ENUM")) children.push(u.name);
+    }
+    for (const c of children) await dumpType(c, depth + 1);
+  }
+  console.log("\n=== SCHEMA DUMP (CreatePostInput 재귀) ===");
+  await dumpType("CreatePostInput", 0);
 } catch (e) {
   console.error("✗", e.message);
   process.exit(1);
