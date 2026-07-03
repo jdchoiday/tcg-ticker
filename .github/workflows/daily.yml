@@ -107,15 +107,19 @@ jobs:
           echo "::error::git push 3회 실패"; exit 1
 
       # Buffer 발행. 기본=초안(saveToDraft). repo 변수 PUBLISH_LIVE=1 이면 실게시.
-      # 위에서 커밋한 공개 raw URL 을 Buffer 가 가져간다.
       - name: publish to Buffer
         if: success()
         env:
           BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
           BUFFER_PROFILE_IDS: ${{ secrets.BUFFER_PROFILE_IDS }}
-          PUBLISH_VIDEO_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/samples/ticker-latest.mp4
           BUFFER_MODE: addToQueue
           BUFFER_SAVE_DRAFT: ${{ vars.PUBLISH_LIVE == '1' && '0' || '1' }}
         run: |
           if [ -z "$BUFFER_ACCESS_TOKEN" ]; then echo "Buffer 미설정 — 발행 건너뜀"; exit 0; fi
+          # ⚠️ 고정 URL(.../main/ticker-latest.mp4)은 매일 덮어써져서, 예약 게시물이 게시 시점에
+          # '최신 영상'을 가져가 매일 같은 영상이 올라가는 문제가 있었음.
+          # → 방금 커밋한 SHA로 고정한 불변 URL 사용: 각 게시물이 그날 영상을 영구 참조.
+          SHA=$(git rev-parse HEAD)
+          export PUBLISH_VIDEO_URL="https://raw.githubusercontent.com/${{ github.repository }}/${SHA}/samples/ticker-latest.mp4"
+          echo "발행 영상 URL(SHA 고정): $PUBLISH_VIDEO_URL"
           node scripts/publish.mjs --confirm
