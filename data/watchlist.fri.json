@@ -1,0 +1,68 @@
+{
+  "_note": "요일별 테마 워치리스트 — EN Premium Modern (151). daily.yml 이 요일(1=월..7=일)로 선택.",
+  "_warning": "가격/이미지는 수집기가 API 로 채움. 금/토/일 시드 카드는 첫 실행에서 매칭 확인 후 tcgPlayerId 로 고정 권장.",
+  "cardImages": true,
+  "topN": 6,
+  "cards": [
+    {
+      "query": "Charizard ex Pokemon 151 199/165",
+      "nameKo": "Charizard ex",
+      "nameEn": "Special Illustration Rare",
+      "set": "151 199/165",
+      "rarity": "SIR",
+      "type": "fire",
+      "lang": "EN",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Venusaur ex Pokemon 151 198/165",
+      "nameKo": "Venusaur ex",
+      "nameEn": "Special Illustration Rare",
+      "set": "151 198/165",
+      "rarity": "SIR",
+      "type": "grass",
+      "lang": "EN",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Blastoise ex Pokemon 151 200/165",
+      "nameKo": "Blastoise ex",
+      "nameEn": "Special Illustration Rare",
+      "set": "151 200/165",
+      "rarity": "SIR",
+      "type": "water",
+      "lang": "EN",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Mew ex Pokemon 151 205/165",
+      "nameKo": "Mew ex",
+      "nameEn": "Special Illustration Rare",
+      "set": "151 205/165",
+      "rarity": "SIR",
+      "type": "psychic",
+      "lang": "EN",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Zapdos ex Pokemon 151 202/165",
+      "nameKo": "Zapdos ex",
+      "nameEn": "Special Illustration Rare",
+      "set": "151 202/165",
+      "rarity": "SIR",
+      "type": "electric",
+      "lang": "EN",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Alakazam ex Pokemon 151 201/165",
+      "nameKo": "Alakazam ex",
+      "nameEn": "Special Illustration Rare",
+      "set": "151 201/165",
+      "rarity": "SIR",
+      "type": "psychic",
+      "lang": "EN",
+      "grade": "PSA 10"
+    }
+  ]
+}

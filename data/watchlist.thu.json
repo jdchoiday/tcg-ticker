@@ -1,0 +1,98 @@
+{
+  "_note": "요일별 테마 워치리스트 — JP Eevee Heroes + Pikachu. daily.yml 이 요일(1=월..7=일)로 선택.",
+  "_warning": "가격/이미지는 수집기가 API 로 채움. 금/토/일 시드 카드는 첫 실행에서 매칭 확인 후 tcgPlayerId 로 고정 권장.",
+  "cardImages": true,
+  "topN": 9,
+  "cards": [
+    {
+      "query": "Umbreon VMAX Eevee Heroes",
+      "nameKo": "ブラッキーVMAX",
+      "nameEn": "Umbreon VMAX SA",
+      "set": "イーブイヒーローズ 095/069",
+      "rarity": "SA",
+      "type": "dark",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Sylveon VMAX Eevee Heroes",
+      "nameKo": "ニンフィアVMAX",
+      "nameEn": "Sylveon VMAX SA",
+      "set": "イーブイヒーローズ 093/069",
+      "rarity": "SA",
+      "type": "fairy",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Glaceon VMAX Eevee Heroes",
+      "nameKo": "グレイシアVMAX",
+      "nameEn": "Glaceon VMAX SA",
+      "set": "イーブイヒーローズ 092/069",
+      "rarity": "SA",
+      "type": "water",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Leafeon VMAX Eevee Heroes",
+      "nameKo": "リーフィアVMAX",
+      "nameEn": "Leafeon VMAX SA",
+      "set": "イーブイヒーローズ 091/069",
+      "rarity": "SA",
+      "type": "grass",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Espeon VMAX Eevee Heroes",
+      "nameKo": "エーフィVMAX",
+      "nameEn": "Espeon VMAX SA",
+      "set": "イーブイヒーローズ 094/069",
+      "rarity": "SA",
+      "type": "psychic",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Vaporeon VMAX Eevee Heroes",
+      "nameKo": "シャワーズVMAX",
+      "nameEn": "Vaporeon VMAX SA",
+      "set": "イーブイヒーローズ 090/069",
+      "rarity": "SA",
+      "type": "water",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Flareon VMAX Eevee Heroes",
+      "nameKo": "ブースターVMAX",
+      "nameEn": "Flareon VMAX SA",
+      "set": "イーブイヒーローズ 096/069",
+      "rarity": "SA",
+      "type": "fire",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Jolteon VMAX Eevee Heroes",
+      "nameKo": "サンダースVMAX",
+      "nameEn": "Jolteon VMAX SA",
+      "set": "イーブイヒーローズ 089/069",
+      "rarity": "SA",
+      "type": "electric",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Pikachu Promo",
+      "nameKo": "ピカチュウ",
+      "nameEn": "Pikachu Promo",
+      "set": "プロモ 208/S-P",
+      "rarity": "Promo",
+      "type": "electric",
+      "lang": "JP",
+      "grade": "PSA 10"
+    }
+  ]
+}

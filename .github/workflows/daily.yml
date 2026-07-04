@@ -18,9 +18,9 @@ on:
         type: boolean
         default: false
       watchlist:
-        description: "버전 강제(jp/en). 비우면 날짜 홀짝 자동"
+        description: "테마 강제(요일 mon~sun 또는 jp/en). 비우면 오늘 요일 자동"
         type: choice
-        options: ["", "jp", "en"]
+        options: ["", "mon", "tue", "wed", "thu", "fri", "sat", "sun", "jp", "en"]
         default: ""
 
 jobs:
@@ -64,15 +64,17 @@ jobs:
         run: |
           ARGS=""
           if [ "${{ inputs.mock }}" = "true" ]; then ARGS="$ARGS --mock"; fi
-          # 매일 홀짝 교대: 연중일(day-of-year) 짝수=일본판 / 홀수=미국판
+          # 요일별 테마 사이클(주7일). 언어(JP/EN)는 각 요일 테마에 내장 → 매일 다른 카테고리+언어.
+          #   월 EN빈티지 / 화 JP모던 / 수 EN알트아트 / 목 JP이브이 / 금 EN프리미엄 / 토 JP체이스 / 일 혼합TOP
           if [ -n "${{ inputs.watchlist }}" ]; then
-            export WATCHLIST_FILE="data/watchlist.${{ inputs.watchlist }}.json"   # 수동 dispatch 시 강제(jp/en)
-          elif [ $(( $(date -u +%-j) % 2 )) -eq 0 ]; then
-            export WATCHLIST_FILE=data/watchlist.jp.json
+            export WATCHLIST_FILE="data/watchlist.${{ inputs.watchlist }}.json"   # 수동 dispatch 강제(mon~sun/jp/en)
           else
-            export WATCHLIST_FILE=data/watchlist.en.json
+            case "$(date -u +%u)" in   # 1=월 .. 7=일 (UTC)
+              1) WL=mon;; 2) WL=tue;; 3) WL=wed;; 4) WL=thu;; 5) WL=fri;; 6) WL=sat;; *) WL=sun;;
+            esac
+            export WATCHLIST_FILE="data/watchlist.$WL.json"
           fi
-          echo "오늘 버전: $WATCHLIST_FILE"
+          echo "오늘 테마: $WATCHLIST_FILE"
           node scripts/pipeline.mjs $ARGS
 
       - name: upload mp4
