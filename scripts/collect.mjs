@@ -19,14 +19,17 @@
  *    - 과금은 limit 기준(기본 50!). 단건은 반드시 limit=1.
  *    첫 실 응답 1건 받으면 search→tcgPlayerId 로 고정 추천(결정적·저비용).
  */
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { FX } from "./lib/fx.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
+// 수집이 폴백(옛 데이터 재사용)했음을 발행 단계에 알리는 표식.
+// 있으면 daily.yml 이 Buffer 발행을 건너뜀 → 같은 영상 중복 업로드 방지.
+const STALE_FLAG = join(ROOT, "out", "collect-stale.flag");
 
 // 환율 단일 출처: scripts/lib/fx.mjs (ticker.html CONFIG.fx 와 일치 유지)
 const KRW_PER_USD = FX.krwPerUsd;
@@ -182,6 +185,8 @@ async function main() {
       if (Array.isArray(prev) && prev.length) {
         console.warn(`⚠ 수집 0개(${why}). 기존 data/cards.json(${prev.length}장) 재사용해 계속 진행.`);
         if (auth401) console.warn("  ※ 401 이 계속되면 PPT_API_KEY 값/일일 한도를 확인하세요(공백 없이 재저장).");
+        // 폴백 표식 남김 → 발행 단계가 중복(같은 영상) 업로드를 건너뛴다. (mock 은 표식 안 남김)
+        if (!MOCK) { await mkdir(dirname(STALE_FLAG), { recursive: true }); await writeFile(STALE_FLAG, `stale:${why}\n`); }
         return;  // 기존 파일 유지, exit 0
       }
     } catch { /* 기존 파일 없음/손상 → 아래에서 하드 실패 */ }
@@ -196,6 +201,7 @@ async function main() {
     return { rank: i + 1, ...card };
   });
 
+  await rm(STALE_FLAG, { force: true }); // 신선 수집 성공 → 폴백 표식 제거
   await writeFile(resolve(ROOT, "data/cards.json"), JSON.stringify(out, null, 2) + "\n", "utf8");
   // 오늘 가격을 이력에 기록(다음 실행의 변동% 기준). mock 은 실가격 오염 방지로 기록 안 함.
   if (!MOCK) {
