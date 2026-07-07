@@ -123,6 +123,10 @@ async function main() {
   const CARD_IMAGES = process.env.PPT_CARD_IMAGES === "1" || wl.cardImages === true;
   if (CARD_IMAGES) log("⚠ 카드 이미지 ON (TCGPlayer CDN) — IP/ToS 본인 책임");
 
+  // 요일 테마 모드: top(기본, 시세순) | movers(변동%순) | gradePremium(PSA10vs9 격차순) | jpVsEn(일판/영판 가격차)
+  const modeWl = wl.mode || "top";
+  const fmtUsdShort = (n) => "$" + Math.round(n).toLocaleString("en-US");
+
   const rows = [];
   let auth401 = false;
   const seenIds = new Set();
@@ -155,15 +159,43 @@ async function main() {
     // 무버스: 직전 기록 대비 변동%(분수). 이력 없으면 null(배지 미표시).
     const histId = String(pid ?? it.query);
     const prev = history[histId];
-    const change = (prev && prev.usd > 0)
+    let change = (prev && prev.usd > 0)
       ? Math.round(((got.usd - prev.usd) / prev.usd) * 1000) / 1000
       : null;
+
+    let pop = it.pop || null;   // 기본: watchlist 의 pop 문자열
+    let metric = null;          // 모드별 정렬 지표
+
+    if (modeWl === "gradePremium") {
+      // 같은 응답에 등급별 가격이 다 있음(추가 크레딧 0) → PSA10 vs PSA9 프리미엄
+      const p9 = pickGradedUsd(card, "PSA 9");
+      if (!p9 || !/ebay/.test(p9.source)) { warn(`PSA9 데이터 없음: ${it.query} — 스킵`); continue; }
+      metric = (got.usd - p9.usd) / p9.usd;
+      change = Math.round(metric * 1000) / 1000;         // 배지 = 프리미엄%
+      pop = `PSA 9 ${fmtUsdShort(p9.usd)}`;              // 부가정보 = PSA9 가격
+    } else if (modeWl === "jpVsEn") {
+      // 같은 카드의 영문판 시세를 추가 조회 → 일판(메인) vs 영판 가격차
+      if (!it.en?.query && !it.en?.tcgPlayerId) { warn(`en 짝 정보 없음: ${it.query} — 스킵`); continue; }
+      let enCard;
+      try {
+        enCard = MOCK ? await getMock(it.en.query) : await fetchCard({ ...it.en, lang: "EN" }, key);
+        if (!MOCK) await sleep(250);
+      } catch (e) { warn(`EN 짝 조회 실패: ${it.en.query} — ${e.message}`); continue; }
+      const gotEn = enCard ? pickGradedUsd(enCard, it.grade) : null;
+      if (!gotEn) { warn(`EN 짝 시세 없음: ${it.en.query} — 스킵`); continue; }
+      const gap = (got.usd - gotEn.usd) / gotEn.usd;
+      metric = Math.abs(gap);
+      change = Math.round(gap * 1000) / 1000;            // 배지 = JP가 EN 대비 ▲/▼%
+      pop = `EN ${fmtUsdShort(gotEn.usd)}`;              // 부가정보 = 영판 가격
+    } else if (modeWl === "movers") {
+      metric = change == null ? null : Math.abs(change); // 변동폭 절대값 순
+    }
 
     const krw = Math.round(got.usd * KRW_PER_USD);
     rows.push({
       nameKo: it.nameKo, nameEn: it.nameEn, set: it.set, rarity: it.rarity,
       type: it.type, lang: it.lang, grade: it.grade,
-      ...(it.pop ? { pop: it.pop } : {}),
+      ...(pop ? { pop } : {}),
       krw,
       ...(change != null ? { change } : {}),
       // 이미지 우선순위: 권리정리 수동 img > API 이미지 > tcgPlayerId 로 직접 생성한 CDN URL.
@@ -172,7 +204,7 @@ async function main() {
         ? (it.img || card.imageCdnUrl400 || card.imageCdnUrl ||
            (pid != null ? `https://tcgplayer-cdn.tcgplayer.com/product/${pid}_in_400x400` : null))
         : null,
-      _usd: got.usd, _src: got.source, _id: histId,
+      _usd: got.usd, _src: got.source, _id: histId, _metric: metric,
     });
   }
 
@@ -195,9 +227,17 @@ async function main() {
     process.exit(1);
   }
 
-  rows.sort((a, b) => b._usd - a._usd);
+  // 모드별 정렬: top=시세순 / movers=변동폭순(이력 없으면 시세순 폴백) / gradePremium·jpVsEn=지표순
+  if (modeWl === "movers" || modeWl === "gradePremium" || modeWl === "jpVsEn") {
+    const m = (x) => (x._metric == null ? -Infinity : x._metric);
+    rows.sort((a, b) => (m(b) - m(a)) || (b._usd - a._usd));
+    if (modeWl === "movers" && rows.every((r) => r._metric == null))
+      warn("이력 데이터 없음(첫 수집) — 무버스 대신 시세순으로 진행");
+  } else {
+    rows.sort((a, b) => b._usd - a._usd);
+  }
   const out = rows.slice(0, topN).map((r, i) => {
-    const { _usd, _src, _id, ...card } = r;
+    const { _usd, _src, _id, _metric, ...card } = r;
     return { rank: i + 1, ...card };
   });
 
