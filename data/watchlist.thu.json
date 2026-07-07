@@ -1,90 +1,18 @@
 {
-  "_note": "요일 테마(KST 게시일 기준) — 💎 Grade Premium 10vs9. daily.yml 이 요일로 선택.",
-  "_warning": "가격/이미지는 수집기가 API 로 채움. 매칭 이상 시 tcgPlayerId 로 고정 권장.",
-  "mode": "gradePremium",
+  "_note": "요일 테마(KST 게시일 기준) — ⚡ Pikachu & Eevee (JP). daily.yml 이 요일로 선택.",
+  "_warning": "가격/이미지는 수집기가 API 로 채움. 신규 시드는 첫 실행 로그에서 매칭 확인 후 tcgPlayerId 고정 권장.",
+  "mode": "top",
   "cardImages": true,
   "topN": 9,
   "cards": [
     {
-      "query": "Charizard Base Set",
-      "tcgPlayerId": "106999",
-      "nameKo": "Charizard",
-      "nameEn": "Base Set Holo",
-      "set": "Base Set 4/102",
-      "rarity": "Holo",
-      "type": "fire",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Charizard VMAX Champions Path",
-      "tcgPlayerId": "223073",
-      "nameKo": "Charizard VMAX",
-      "nameEn": "Rainbow Rare",
-      "set": "Champion's Path 074/073",
-      "rarity": "HR",
-      "type": "fire",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Charizard Dragon Frontiers",
-      "nameKo": "Charizard ★",
-      "nameEn": "Gold Star",
-      "set": "Dragon Frontiers 100/101",
-      "rarity": "Gold Star",
-      "type": "fire",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Umbreon VMAX Evolving Skies",
-      "nameKo": "Umbreon VMAX",
-      "nameEn": "Alt Art (Moonbreon)",
-      "set": "Evolving Skies 215/203",
-      "rarity": "SAR",
-      "type": "dark",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Rayquaza VMAX Evolving Skies",
-      "nameKo": "Rayquaza VMAX",
-      "nameEn": "Alt Art",
-      "set": "Evolving Skies 218/203",
-      "rarity": "SAR",
-      "type": "dragon",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Giratina V Lost Origin",
-      "nameKo": "Giratina V",
-      "nameEn": "Alt Art",
-      "set": "Lost Origin 186/196",
-      "rarity": "SAR",
-      "type": "dragon",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Mew VMAX Fusion Strike",
-      "nameKo": "Mew VMAX",
-      "nameEn": "Alt Art",
-      "set": "Fusion Strike 268/264",
-      "rarity": "SAR",
-      "type": "psychic",
-      "lang": "EN",
-      "grade": "PSA 10"
-    },
-    {
-      "query": "Lugia V Silver Tempest",
-      "nameKo": "Lugia V",
-      "nameEn": "Alt Art",
-      "set": "Silver Tempest 186/195",
-      "rarity": "SAR",
-      "type": "psychic",
-      "lang": "EN",
+      "query": "Pikachu Promo",
+      "nameKo": "ピカチュウ",
+      "nameEn": "Pikachu Promo",
+      "set": "プロモ 208/S-P",
+      "rarity": "Promo",
+      "type": "electric",
+      "lang": "JP",
       "grade": "PSA 10"
     },
     {
@@ -98,12 +26,72 @@
       "grade": "PSA 10"
     },
     {
-      "query": "Mew VMAX Fusion Arts",
-      "nameKo": "ミュウVMAX",
-      "nameEn": "Mew VMAX SA",
-      "set": "フュージョンアーツ 218/172",
+      "query": "Sylveon VMAX Eevee Heroes",
+      "nameKo": "ニンフィアVMAX",
+      "nameEn": "Sylveon VMAX SA",
+      "set": "イーブイヒーローズ 093/069",
+      "rarity": "SA",
+      "type": "fairy",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Glaceon VMAX Eevee Heroes",
+      "nameKo": "グレイシアVMAX",
+      "nameEn": "Glaceon VMAX SA",
+      "set": "イーブイヒーローズ 092/069",
+      "rarity": "SA",
+      "type": "water",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Leafeon VMAX Eevee Heroes",
+      "nameKo": "リーフィアVMAX",
+      "nameEn": "Leafeon VMAX SA",
+      "set": "イーブイヒーローズ 091/069",
+      "rarity": "SA",
+      "type": "grass",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Espeon VMAX Eevee Heroes",
+      "nameKo": "エーフィVMAX",
+      "nameEn": "Espeon VMAX SA",
+      "set": "イーブイヒーローズ 094/069",
       "rarity": "SA",
       "type": "psychic",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Vaporeon VMAX Eevee Heroes",
+      "nameKo": "シャワーズVMAX",
+      "nameEn": "Vaporeon VMAX SA",
+      "set": "イーブイヒーローズ 090/069",
+      "rarity": "SA",
+      "type": "water",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Flareon VMAX Eevee Heroes",
+      "nameKo": "ブースターVMAX",
+      "nameEn": "Flareon VMAX SA",
+      "set": "イーブイヒーローズ 096/069",
+      "rarity": "SA",
+      "type": "fire",
+      "lang": "JP",
+      "grade": "PSA 10"
+    },
+    {
+      "query": "Jolteon VMAX Eevee Heroes",
+      "nameKo": "サンダースVMAX",
+      "nameEn": "Jolteon VMAX SA",
+      "set": "イーブイヒーローズ 089/069",
+      "rarity": "SA",
+      "type": "electric",
       "lang": "JP",
       "grade": "PSA 10"
     }
