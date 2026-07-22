@@ -5,11 +5,12 @@ name: daily-ticker
 # 대안: Railway cron 에서 `npm ci && npx playwright install --with-deps chromium && npm run pipeline` 동일.
 
 on:
-  schedule:
-    # 19:30 UTC = KST 04:30. cron 지연(최대 ~1h)이 있어도 06시 전에 끝나
-    # Buffer 큐의 "그날 아침 7시" 슬롯에 당일 게시됨(하루 지연/요일 밀림 제거).
-    - cron: "30 19 * * *"
-  workflow_dispatch:        # 수동 실행
+  # ⏸ 자동 발행 일시정지 (틱톡 섀도우밴 회복 휴지기, 2026-07-07~).
+  #    재개하려면 아래 schedule 블록 주석 해제.
+  #    (19:30 UTC = KST 04:30 → 그날 아침 7시 Buffer 슬롯에 당일 게시)
+  # schedule:
+  #   - cron: "30 19 * * *"
+  workflow_dispatch:        # 수동 실행(휴지기 중에도 가능)
     inputs:
       mock:
         description: "fixtures 로 수집(키 없이)"
